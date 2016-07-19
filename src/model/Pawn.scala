@@ -1,4 +1,4 @@
-package model;
+package main.model;
 
 class Pawn(var board: Board, var x: Int, var y: Int, player: Player) {
   def move(inHeight: Int, inWidth: Int) {

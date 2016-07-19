@@ -1,4 +1,4 @@
-package model
+package main.model
 
 class Board(_width: Int, _height: Int) {
   def this() = this(8, 8)
