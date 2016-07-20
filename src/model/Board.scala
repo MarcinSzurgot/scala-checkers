@@ -12,6 +12,23 @@ class Board(_width: Int, _height: Int) {
     board(x)(y) = pawn;
   }
   
+  def initBoard(rows: Int, players: List[Player]) {
+      for( i <- 1 until rows){
+        addPawnsToRow(i, players(0));
+      }
+      for( i <- height-1 until height-4){
+        addPawnsToRow(i, players(1));
+      }
+  }
+  
+  def addPawnsToRow(x: Int, player: Player) {
+     for( j <- 0 until _width) {
+       if ((x+j)%2 == 1) {
+          _board(x)(j) = new Pawn(this, x, j, player);
+       }
+     }
+  }
+  
   def width = _width;
   
   def height = _height;

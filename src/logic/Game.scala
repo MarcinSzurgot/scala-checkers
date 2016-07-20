@@ -7,6 +7,10 @@ object Game {
   private var _players: List[Player] = List();
   private var currentPlayerIndex = 1;
   private var _playersCount = 0;
+  private var _gameEnd = false;
+  
+  def gameEnd = _gameEnd;
+  def gameEnd_= (value: Boolean):Unit = _gameEnd = value 
   
   def initGame(
   boardWidth: Int, 
@@ -25,8 +29,11 @@ object Game {
   
   def runTurn(): Board = {
     _players(currentPlayerIndex%_playersCount).runTurn();
-    currentPlayerIndex +=1;
+    if(_players(currentPlayerIndex%_playersCount).runEnded) {
+      currentPlayerIndex +=1;
+    }
     
     return _board;
   }
+  
 }
