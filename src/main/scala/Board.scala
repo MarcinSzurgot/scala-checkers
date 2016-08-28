@@ -14,7 +14,7 @@ class Board(val boardState: Array[Array[PawnType]]) {
 
   def getMoves(x:Int,y:Int): ListBuffer[Point] ={
     var listOfMoves = new ListBuffer[Point]()
-    
+
 
       //dla Pionków
       if(brdState(x)(y)==WHITE){
@@ -68,7 +68,7 @@ class Board(val boardState: Array[Array[PawnType]]) {
 
 
 
-
+/*
 object Demo {
   def main(args: Array[String]) {
     var myMatrix = Array.ofDim[PawnType](8, 8)
@@ -87,3 +87,4 @@ object Demo {
 
   }
 }
+*/
