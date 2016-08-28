@@ -16,10 +16,10 @@ class Board(val boardState: Array[Array[PawnType]]) {
     if(brdState(x)(y)==WHITE) {
       if (y + 1 < 7) {
         if (x + 1 < 7 && brdState(x + 1)(y + 1) == EMPTY) {
-          listOfMoves.+=:(new Point(x + 1, y + 1))
+          listOfMoves.+=(new Point(x + 1, y + 1))
         }
         if (x - 1 < 7 && brdState(x - 1)(y + 1) == EMPTY) {
-          listOfMoves.+=:(new Point(x - 1, y + 1))
+          listOfMoves.+=(new Point(x - 1, y + 1))
         }
       }
     }
@@ -31,43 +31,59 @@ class Board(val boardState: Array[Array[PawnType]]) {
     if(brdState(x)(y)==BLACK){
       if(y-1>=0) {
         if (x + 1 < 7 && brdState(x + 1)(y - 1) == EMPTY) {
-          listOfMoves.+=:(new Point(x + 1, y - 1))
+          listOfMoves.+=(new Point(x + 1, y - 1))
         }
         if (x - 1 < 7 && brdState(x - 1)(y - 1) == EMPTY) {
-          listOfMoves.+=:(new Point(x - 1, y - 1))
+          listOfMoves.+=(new Point(x - 1, y - 1))
         }
       }
     }
     listOfMoves.toList
   }
 
+  def getMovesForPROMOTED(x:Int,y:Int): List[Point] ={
+    var listOfMoves = new ListBuffer[Point]()
+    if(brdState(x)(y)==WHITE_PROMOTED || brdState(x)(y)==BLACK_PROMOTED) {
 
-
-
-  def getMoves(x:Int,y:Int): List[Point] ={
-    var listOfMoves: List[Point] = List()
-
-      //dla Pionków
-
-      listOfMoves = getMovesForWHITE(x,y):::getMovesForBLACK(x,y)
-
-
-
-
-      //dla damek
-      if(brdState(x)(y) == BLACK_PROMOTED || brdState(x)(y) == WHITE_PROMOTED) {
-
+      var xTmp=x+1
+      var yTmp=y+1
+      while (xTmp<8 && yTmp<8 && brdState(xTmp)(yTmp)==EMPTY){
+        listOfMoves.+=(new Point(xTmp,yTmp))
+        xTmp +=1
+        yTmp +=1
       }
 
+      xTmp=x-1
+      yTmp=y-1
+      while (xTmp>=0 && yTmp>=0 && brdState(xTmp)(yTmp)==EMPTY){
+        listOfMoves.+=(new Point(xTmp,yTmp))
+        xTmp -=1
+        yTmp -=1
+      }
 
-    listOfMoves
+      xTmp=x+1
+      yTmp=y-1
+      while (xTmp<8 && yTmp>=0 && brdState(xTmp)(yTmp)==EMPTY){
+        listOfMoves.+=(new Point(xTmp,yTmp))
+        xTmp +=1
+        yTmp -=1
+      }
+
+      xTmp=x-1
+      yTmp=y+1
+      while (xTmp>=0 && yTmp<8 && brdState(xTmp)(yTmp)==EMPTY){
+        listOfMoves.+=(new Point(xTmp,yTmp))
+        xTmp -=1
+        yTmp +=1
+      }
+    }
+    listOfMoves.toList
   }
 
-
-
-
-
-
+  def getMoves(x:Int,y:Int): List[Point] ={
+    val listOfMoves: List[Point] = getMovesForWHITE(x,y):::getMovesForBLACK(x,y):::getMovesForPROMOTED(x,y)
+    listOfMoves
+  }
 
   def getPawn(x:Int,y:Int):  PawnType ={
     brdState(x)(y)
@@ -91,7 +107,7 @@ class Board(val boardState: Array[Array[PawnType]]) {
 
 
 
-
+/*
 object Demo {
   def main(args: Array[String]) {
     var myMatrix = Array.ofDim[PawnType](8, 8)
@@ -110,4 +126,4 @@ object Demo {
 
   }
 }
-
+*/
