@@ -1,4 +1,6 @@
-import PawnType._
+package main.scala;
+
+import main.scala.PawnType._;
 
 import scala.collection.mutable.ListBuffer
 
