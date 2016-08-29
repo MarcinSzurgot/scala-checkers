@@ -20,8 +20,8 @@ object Testing {
       }
     }
     
-    fill(0, rows, BLACK);
-    fill(height - rows, height, WHITE);
+    fill(0, rows, WHITE);
+    fill(height - rows, height, BLACK);
     return board;
   }
 
@@ -29,9 +29,15 @@ object Testing {
     var board = new Board(createBoard(8, 8, 3));
     for(x <- 0 to 7){
       for(y <- 0 to 7){
-        print(board.getPawn(x, y) + ", ");
-    	  print(board.getMovesForBLACK(x, y));
-    	  print(board.getMovesForWHITE(x, y));            
+        val p = board.getPawn(x, y);
+        print("Position - x: " + x + ", y: " +  y +
+            " Pawn Type: " + p + ", moves: ");
+    	  if(p == WHITE){
+    	    print(board.getMovesForWHITE(x, y) + ", ");
+    	  }else{
+    	    print(board.getMovesForBLACK(x, y) + ", ");
+    	  }
+    	  println();
       }
     }
   }
