@@ -25,5 +25,6 @@ offline := true
 parallelExecution in Test := false
 
 libraryDependencies ++= Seq(
+	"org.scalafx" %% "scalafx" % "8.0.92-R10",
 	"org.scalatest" %% "scalatest" % "2.2.4" % "test" withSources() withJavadoc()
 )
