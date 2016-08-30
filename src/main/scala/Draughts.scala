@@ -1,4 +1,4 @@
-import view.BoardScene
+import main.scala.view.BoardScene
 import scalafx.application.JFXApp
 
 object Draughts extends JFXApp {

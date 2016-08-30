@@ -1,7 +1,7 @@
 /**
   * Created by bzielinski91 on 28.08.2016.
   */
-package main.scala;
+package main.scala.model
 
 object PawnType extends Enumeration {
   type PawnType = Value

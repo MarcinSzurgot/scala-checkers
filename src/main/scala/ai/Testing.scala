@@ -1,8 +1,8 @@
 package main.scala.ai
 
-import main.scala.PawnType;
-import main.scala.PawnType._;
-import main.scala.Board;
+import main.scala.model.PawnType
+import main.scala.model.PawnType._
+import main.scala.model.Board;
 
 object Testing {
 
