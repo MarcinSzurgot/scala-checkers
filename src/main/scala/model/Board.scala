@@ -17,11 +17,11 @@ class Board(var boardState: Array[Array[PawnType]]) {
   def getMovesForWHITE(x:Int,y:Int): List[Point2D] ={
     var listOfMoves = new ListBuffer[Point2D]()
     if(boardState(x)(y)==WHITE) {
-      if (y + 1 < 7) {
-        if (x + 1 < 7 && boardState(x + 1)(y + 1) == EMPTY) {
+      if (y + 1 < 8) {
+        if (x + 1 < 8 && boardState(x + 1)(y + 1) == EMPTY) {
           listOfMoves.+=(new Point2D(x + 1, y + 1))
         }
-        if (x - 1 < 7 && boardState(x - 1)(y + 1) == EMPTY) {
+        if (x - 1 < 8 && boardState(x - 1)(y + 1) == EMPTY) {
           listOfMoves.+=(new Point2D(x - 1, y + 1))
         }
       }
@@ -33,10 +33,10 @@ class Board(var boardState: Array[Array[PawnType]]) {
     var listOfMoves = new ListBuffer[Point2D]()
     if(boardState(x)(y)==BLACK){
       if(y-1>=0) {
-        if (x + 1 < 7 && boardState(x + 1)(y - 1) == EMPTY) {
+        if (x + 1 < 8 && boardState(x + 1)(y - 1) == EMPTY) {
           listOfMoves.+=(new Point2D(x + 1, y - 1))
         }
-        if (x - 1 < 7 && boardState(x - 1)(y - 1) == EMPTY) {
+        if (x - 1 < 8 && boardState(x - 1)(y - 1) == EMPTY) {
           listOfMoves.+=(new Point2D(x - 1, y - 1))
         }
       }
