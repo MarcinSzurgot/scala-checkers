@@ -7,22 +7,23 @@ import main.scala.model.PawnType._
 /**
   * Created by bzielinski91 on 28.08.2016.
   */
-class Board(var boardState: Array[Array[PawnType]]) {
+class Board(var _boardState: Array[Array[PawnType]]) {
 
   def move(startPoint: Point2D, endPoint: Point2D): Unit ={
-    boardState(endPoint.x.toInt)(endPoint.y.toInt) = boardState(startPoint.x.toInt)(startPoint.y.toInt)
-    boardState(startPoint.x.toInt)(startPoint.y.toInt) = EMPTY
+    _boardState(endPoint.x.toInt)(endPoint.y.toInt) = _boardState(startPoint.x.toInt)(startPoint.y.toInt)
+    _boardState(startPoint.x.toInt)(startPoint.y.toInt) = EMPTY
   }
 
   def getMovesForWHITE(x:Int,y:Int): List[Point2D] ={
     var listOfMoves = new ListBuffer[Point2D]()
-    if(boardState(x)(y)==WHITE) {
-      if (y + 1 < 8) {
-        if (x + 1 < 8 && boardState(x + 1)(y + 1) == EMPTY) {
+
+    if(_boardState(x)(y)==WHITE) {
+      if (x + 1 < 8) {
+        if ((y + 1 < 8) && (_boardState(x + 1)(y + 1) == EMPTY)) {
           listOfMoves.+=(new Point2D(x + 1, y + 1))
         }
-        if (x - 1 < 8 && boardState(x - 1)(y + 1) == EMPTY) {
-          listOfMoves.+=(new Point2D(x - 1, y + 1))
+        if ((y - 1 >= 0) && (_boardState(x + 1)(y - 1) == EMPTY)) {
+          listOfMoves.+=(new Point2D(x + 1, y - 1))
         }
       }
     }
@@ -30,13 +31,14 @@ class Board(var boardState: Array[Array[PawnType]]) {
   }
 
   def getMovesForBLACK(x:Int,y:Int): List[Point2D] ={
+
     var listOfMoves = new ListBuffer[Point2D]()
-    if(boardState(x)(y)==BLACK){
-      if(y-1>=0) {
-        if (x + 1 < 8 && boardState(x + 1)(y - 1) == EMPTY) {
-          listOfMoves.+=(new Point2D(x + 1, y - 1))
+    if(_boardState(x)(y)==BLACK){
+      if(x-1>=0) {
+        if (y + 1 < 8 && _boardState(x - 1)(y + 1) == EMPTY) {
+          listOfMoves.+=(new Point2D(x - 1, y + 1))
         }
-        if (x - 1 < 8 && boardState(x - 1)(y - 1) == EMPTY) {
+        if (y - 1 >= 0 && _boardState(x - 1)(y - 1) == EMPTY) {
           listOfMoves.+=(new Point2D(x - 1, y - 1))
         }
       }
@@ -46,11 +48,11 @@ class Board(var boardState: Array[Array[PawnType]]) {
 
   def getMovesForPROMOTED(x:Int,y:Int): List[Point2D] ={
     var listOfMoves = new ListBuffer[Point2D]()
-    if(boardState(x)(y)==WHITE_PROMOTED || boardState(x)(y)==BLACK_PROMOTED) {
+    if(_boardState(x)(y)==WHITE_PROMOTED || _boardState(x)(y)==BLACK_PROMOTED) {
 
       var xTmp=x+1
       var yTmp=y+1
-      while (xTmp<8 && yTmp<8 && boardState(xTmp)(yTmp)==EMPTY){
+      while (xTmp<8 && yTmp<8 && _boardState(xTmp)(yTmp)==EMPTY){
         listOfMoves.+=(new Point2D(xTmp,yTmp))
         xTmp +=1
         yTmp +=1
@@ -58,7 +60,7 @@ class Board(var boardState: Array[Array[PawnType]]) {
 
       xTmp=x-1
       yTmp=y-1
-      while (xTmp>=0 && yTmp>=0 && boardState(xTmp)(yTmp)==EMPTY){
+      while (xTmp>=0 && yTmp>=0 && _boardState(xTmp)(yTmp)==EMPTY){
         listOfMoves.+=(new Point2D(xTmp,yTmp))
         xTmp -=1
         yTmp -=1
@@ -66,7 +68,7 @@ class Board(var boardState: Array[Array[PawnType]]) {
 
       xTmp=x+1
       yTmp=y-1
-      while (xTmp<8 && yTmp>=0 && boardState(xTmp)(yTmp)==EMPTY){
+      while (xTmp<8 && yTmp>=0 && _boardState(xTmp)(yTmp)==EMPTY){
         listOfMoves.+=(new Point2D(xTmp,yTmp))
         xTmp +=1
         yTmp -=1
@@ -74,7 +76,7 @@ class Board(var boardState: Array[Array[PawnType]]) {
 
       xTmp=x-1
       yTmp=y+1
-      while (xTmp>=0 && yTmp<8 && boardState(xTmp)(yTmp)==EMPTY){
+      while (xTmp>=0 && yTmp<8 && _boardState(xTmp)(yTmp)==EMPTY){
         listOfMoves.+=(new Point2D(xTmp,yTmp))
         xTmp -=1
         yTmp +=1
@@ -89,15 +91,19 @@ class Board(var boardState: Array[Array[PawnType]]) {
   }
 
   def getPawn(x:Int,y:Int):  PawnType ={
-    boardState(x)(y)
+    _boardState(x)(y)
   }
 
-  def getBoardState = boardState
+  def setPawn(x:Int,y:Int,tp:PawnType): Unit ={
+    _boardState(x)(y)=tp
+  }
+
+  def boardState = _boardState
 
   def printBoardState(): Unit ={
     for (i <- 0 to 7) {
       for (j <- 0 to 7) {
-        print(" " + boardState(i)(j));
+        print(" " + _boardState(i)(j));
       }
       println();
     }

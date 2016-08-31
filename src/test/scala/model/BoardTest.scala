@@ -1,6 +1,6 @@
 package model
 
-import main.scala.model.{Board, BoardBuilder}
+import main.scala.model.{PawnType, Board, BoardBuilder}
 import org.scalatest.{BeforeAndAfterEach, FunSuite}
 
 import scalafx.geometry.Point2D
@@ -29,7 +29,7 @@ class BoardTest extends FunSuite with BeforeAndAfterEach {
   }
 
   test("testPrintBoardState") {
-
+    board.printBoardState()
   }
 
   test("testGetMoves") {
@@ -37,11 +37,26 @@ class BoardTest extends FunSuite with BeforeAndAfterEach {
   }
 
   test("testGetMovesForWHITE") {
-
+    println("Pawn: "+board.getPawn(2,1))
+    val listOfMoves: List[Point2D] = board.getMovesForWHITE(2,1)
+    var i=0
+    for (move <- listOfMoves){
+      println(move.x.toInt+", "+move.y.toInt)
+      i+=1
+    }
+    assert(i==2)
   }
 
   test("testGetMovesForPROMOTED") {
-
+    board.setPawn(5,6,PawnType.BLACK_PROMOTED)
+    println("Pawn: "+board.getPawn(5,6))
+    val listOfMoves: List[Point2D] = board.getMovesForPROMOTED(5,6)
+    var i=0
+    for (move <- listOfMoves) {
+      println(move.x.toInt + ", " + move.y.toInt)
+      i += 1
+    }
+    assert(i==3)
   }
 
   test("testGetBoardState") {
@@ -57,7 +72,15 @@ class BoardTest extends FunSuite with BeforeAndAfterEach {
   }
 
   test("testGetMovesForBLACK") {
-
+    println("Pawn: "+board.getPawn(5,6))
+    val listOfMoves: List[Point2D] = board.getMovesForBLACK(5,6)
+    var i=0
+    for (move <- listOfMoves) {
+      println(move.x.toInt + ", " + move.y.toInt)
+      i+=1
+    }
+    assert(i==2)
   }
+
 
 }
