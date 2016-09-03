@@ -1,5 +1,6 @@
 package main.scala.model
 
+import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 import scalafx.geometry.Point2D
 import main.scala.model.PawnType._
@@ -8,6 +9,66 @@ import main.scala.model.PawnType._
   * Created by bzielinski91 on 28.08.2016.
   */
 class Board(var _boardState: Array[Array[PawnType]]) {
+
+
+
+
+  def getBeatingForPawn(x:Int,y:Int): scala.collection.mutable.Map[List[Point2D], Point2D] ={
+    var listOfBeatings = scala.collection.mutable.Map[List[Point2D], Point2D]()
+    var listOfPawnToRemove = new ListBuffer[Point2D]
+    var pawnToBeating = new ListBuffer[PawnType]
+
+    if(_boardState(x)(y) == WHITE) {
+      pawnToBeating += BLACK
+      pawnToBeating += BLACK_PROMOTED
+    }
+    if(_boardState(x)(y) == BLACK) {
+      pawnToBeating += WHITE
+      pawnToBeating += WHITE_PROMOTED
+    }
+    def checkBeating(_boardStateTmp: Array[Array[PawnType]], xTmp:Int, yTmp:Int, listOfPawnToRemove:ListBuffer[Point2D]) {
+      var isEndBeatings: Boolean = true
+
+      def checkSingleBeating(vertical:Int,horizontal:Int): Unit ={
+        var _boardStateTmpTmp: Array[Array[PawnType]] = _boardStateTmp
+        _boardStateTmpTmp(xTmp + vertical)(yTmp + horizontal) = EMPTY
+        _boardStateTmpTmp(xTmp + (vertical*2))(yTmp + (horizontal*2)) = _boardStateTmpTmp(xTmp)(yTmp)
+        _boardStateTmpTmp(xTmp)(yTmp) = EMPTY
+        var listOfPawnToRemoveTmp = listOfPawnToRemove
+        listOfPawnToRemoveTmp.+=(new Point2D(xTmp + vertical, yTmp + horizontal))
+        isEndBeatings = false
+        checkBeating(_boardStateTmpTmp, xTmp + (vertical*2), yTmp + (horizontal*2), listOfPawnToRemoveTmp);
+      }
+      if (xTmp < 6 && yTmp < 6) {
+        if (pawnToBeating.contains(_boardStateTmp(xTmp + 1)(yTmp + 1)) && _boardStateTmp(xTmp + 2)(yTmp + 2) == EMPTY) {
+          checkSingleBeating(1,1)
+        }
+      }
+      if (xTmp < 6 && yTmp > 1) {
+        if (pawnToBeating.contains(_boardStateTmp(xTmp + 1)(yTmp - 1)) && _boardStateTmp(xTmp + 2)(yTmp - 2) == EMPTY) {
+          checkSingleBeating(1,-1)
+        }
+      }
+      if (xTmp > 1 && yTmp > 1) {
+        if (pawnToBeating.contains(_boardStateTmp(xTmp - 1)(yTmp - 1)) && _boardStateTmp(xTmp - 2)(yTmp - 2) == EMPTY) {
+          checkSingleBeating(-1,-1)
+        }
+      }
+      if (xTmp > 1 && yTmp < 6) {
+        if (pawnToBeating.contains(_boardStateTmp(xTmp - 1)(yTmp + 1)) && _boardStateTmp(xTmp - 2)(yTmp + 2) == EMPTY) {
+          checkSingleBeating(-1,1)
+        }
+      }
+      if(isEndBeatings){
+        val endingPointOfPawn = new Point2D(xTmp,yTmp)
+        listOfBeatings += listOfPawnToRemove.toList -> endingPointOfPawn
+        listOfPawnToRemove.clear()
+      }
+    }
+    checkBeating(_boardState,x,y,listOfPawnToRemove);
+    listOfBeatings
+  }
+
 
   def move(startPoint: Point2D, endPoint: Point2D): Unit ={
     _boardState(endPoint.x.toInt)(endPoint.y.toInt) = _boardState(startPoint.x.toInt)(startPoint.y.toInt)
@@ -108,4 +169,6 @@ class Board(var _boardState: Array[Array[PawnType]]) {
       println();
     }
   }
+
+
 }
