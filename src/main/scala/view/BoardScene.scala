@@ -2,7 +2,7 @@ package main.scala.view
 
 import scalafx.scene.layout._
 import scalafx.Includes._
-import scalafx.geometry.{HPos, VPos}
+import scalafx.geometry.{HPos, Point2D, VPos}
 import scalafx.scene.Scene
 import scalafx.scene.input.MouseEvent
 import main.scala.logic.Game
@@ -31,6 +31,7 @@ class BoardScene extends Scene
             } else {
               styleClass += "selected"
             }
+            clearSelected()
           }
         }
         board(i-1)(a-1) = boardPiece
@@ -39,7 +40,47 @@ class BoardScene extends Scene
     }
   }
 
-  def updatePosition(): Unit = {
+  def updatePosition(startPoint: Point2D, endPoint: Point2D): Unit = {
+    clearAllPawns(board(endPoint.x.toInt)(endPoint.y.toInt))
+    board(endPoint.x.toInt)(endPoint.y.toInt).styleClass += getStartingStyleClass(board(startPoint.x.toInt)(startPoint.y.toInt));
+  }
 
+  def clearSelected(): Unit = {
+    board.foreach{ x => x.foreach { x => x.styleClass -= "selected" } }
+  }
+  def clearAllPawns(stackPane: StackPane): Unit = {
+    stackPane.styleClass -= "whitePawn"
+    stackPane.styleClass -= "whiteQueen"
+    stackPane.styleClass -= "blackPawn"
+    stackPane.styleClass -= "blackQueen"
+  }
+
+  def getStartingStyleClass(stackPane: StackPane): String = {
+    if(stackPane.styleClass.contains("whitePawn")) {
+      stackPane.styleClass -= "whitePawn"
+      return "whitePawn";
+    }
+    if(stackPane.styleClass.contains("blackPawn")) {
+      stackPane.styleClass -= "blackPawn"
+      return "blackPawn";
+    }
+    if(stackPane.styleClass.contains("whiteQueen")) {
+      stackPane.styleClass -= "whiteQueen"
+      return "whiteQueen";
+    }
+    if(stackPane.styleClass.contains("blackQueen")) {
+      stackPane.styleClass -= "blackQueen"
+      return "blackQueen";
+    }
+    return "None";
+  }
+
+  def promote(stackPane: StackPane): Unit = {
+    if(stackPane.styleClass.contains("whitePawn")) {
+      stackPane.styleClass -= "whitePawn"
+      stackPane.styleClass += "whiteQueen"
+    }
+    stackPane.styleClass -= "blackPawn"
+    stackPane.styleClass += "blackQueen"
   }
 }
