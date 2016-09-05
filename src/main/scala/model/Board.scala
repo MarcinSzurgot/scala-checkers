@@ -11,6 +11,10 @@ import main.scala.model.PawnType._
 class Board(var _boardState: Array[Array[PawnType]]) {
 
 
+  def makeBeat(pawn:Point2D,pawnsToRemove:List[Point2D],endingPoint:Point2D):Unit ={
+    pawnsToRemove.foreach(e=> _boardState(e.x.toInt)(e.y.toInt)=EMPTY)
+    move(pawn,endingPoint)
+  }
 
 
   def getBeatingForPawn(x:Int,y:Int): scala.collection.mutable.Map[List[Point2D], Point2D] ={
@@ -30,7 +34,7 @@ class Board(var _boardState: Array[Array[PawnType]]) {
       var isEndBeatings: Boolean = true
 
       def checkSingleBeating(vertical:Int,horizontal:Int): Unit ={
-        var _boardStateTmpTmp: Array[Array[PawnType]] = _boardStateTmp
+        var _boardStateTmpTmp: Array[Array[PawnType]] =_boardStateTmp.map(_.clone())
         _boardStateTmpTmp(xTmp + vertical)(yTmp + horizontal) = EMPTY
         _boardStateTmpTmp(xTmp + (vertical*2))(yTmp + (horizontal*2)) = _boardStateTmpTmp(xTmp)(yTmp)
         _boardStateTmpTmp(xTmp)(yTmp) = EMPTY
