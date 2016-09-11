@@ -96,6 +96,25 @@ class BoardTest extends FunSuite with BeforeAndAfterEach {
   }
 
 
+  test("getBeatingForPromotedPawn"){
+    println("Pawn: "+board.getPawn(5,6))
+    board.setPawn(1,2,PawnType.EMPTY)
+    board.setPawn(5,6,PawnType.BLACK_PROMOTED)
+
+    board.printBoardState()
+    val listOfBeatings :scala.collection.mutable.Map[List[Point2D], Point2D] = board.getBeatingForPromotedPawn(5,6)
+
+    for (beating <- listOfBeatings){
+      println("End point: "+beating._2.x.toInt+", "+beating._2.y.toInt)
+      for(pawnToBeating <- beating._1){
+        println("Pawn to beating: "+pawnToBeating.x.toInt+", "+pawnToBeating.y.toInt)
+      }
+    }
+    board.printBoardState()
+    assert(listOfBeatings.size==1)
+  }
+
+
   test("makeBeat"){
     println("Pawn: "+board.getPawn(5,4))
     val testPawn = board.getPawn(5,4)
@@ -114,6 +133,5 @@ class BoardTest extends FunSuite with BeforeAndAfterEach {
     board.printBoardState()
     assert(testPawn==board.getPawn(endingPoint.x.toInt,endingPoint.y.toInt))
   }
-
 
 }

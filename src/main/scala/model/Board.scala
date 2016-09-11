@@ -16,6 +16,83 @@ class Board(var _boardState: Array[Array[PawnType]]) {
     move(pawn,endingPoint)
   }
 
+  def getBeatingForPromotedPawn(x:Int,y:Int): scala.collection.mutable.Map[List[Point2D], Point2D] ={
+    var listOfBeatings = scala.collection.mutable.Map[List[Point2D], Point2D]()
+    var listOfPawnToRemove = new ListBuffer[Point2D]
+    var pawnToBeating = new ListBuffer[PawnType]
+
+    if(_boardState(x)(y) == WHITE_PROMOTED) {
+      pawnToBeating += BLACK
+      pawnToBeating += BLACK_PROMOTED
+    }
+    if(_boardState(x)(y) == BLACK_PROMOTED) {
+      pawnToBeating += WHITE
+      pawnToBeating += WHITE_PROMOTED
+    }
+    def checkBeating(_boardStateTmp: Array[Array[PawnType]], xTmp:Int, yTmp:Int, listOfPawnToRemove:ListBuffer[Point2D]) {
+      var isEndBeatings: Boolean = true
+      var xTmpTmp=xTmp
+      var yTmpTmp=yTmp
+
+      def checkSingleBeating(vertical:Int,horizontal:Int): Unit ={
+        var _boardStateTmpTmp: Array[Array[PawnType]] =_boardStateTmp.map(_.clone())
+        _boardStateTmpTmp(xTmpTmp + vertical)(yTmpTmp + horizontal) = EMPTY
+        _boardStateTmpTmp(xTmpTmp + (vertical*2))(yTmpTmp + (horizontal*2)) = _boardStateTmpTmp(xTmpTmp)(yTmpTmp)
+        _boardStateTmpTmp(xTmpTmp)(yTmpTmp) = EMPTY
+        var listOfPawnToRemoveTmp = listOfPawnToRemove
+        listOfPawnToRemoveTmp.+=(new Point2D(xTmpTmp + vertical, yTmpTmp + horizontal))
+        isEndBeatings = false
+        checkBeating(_boardStateTmpTmp, xTmpTmp + (vertical*2), yTmpTmp + (horizontal*2), listOfPawnToRemoveTmp);
+      }
+
+      while (xTmpTmp < 6 && yTmpTmp < 6) {
+        if (pawnToBeating.contains(_boardStateTmp(xTmpTmp + 1)(yTmpTmp + 1)) && _boardStateTmp(xTmpTmp + 2)(yTmpTmp + 2) == EMPTY && _boardStateTmp(xTmpTmp)(yTmpTmp) == EMPTY) {
+          checkSingleBeating(1, 1)
+        }
+        xTmpTmp+=1
+        yTmpTmp+=1
+      }
+
+      xTmpTmp=xTmp
+      yTmpTmp=yTmp
+      while (xTmpTmp < 6 && yTmpTmp > 1) {
+        if (pawnToBeating.contains(_boardStateTmp(xTmpTmp + 1)(yTmpTmp - 1)) && _boardStateTmp(xTmpTmp + 2)(yTmpTmp - 2) == EMPTY && _boardStateTmp(xTmpTmp)(yTmpTmp) == EMPTY) {
+          checkSingleBeating(1,-1)
+        }
+        xTmpTmp+=1
+        yTmpTmp-=1
+      }
+
+      xTmpTmp=xTmp
+      yTmpTmp=yTmp
+      while (xTmpTmp > 1 && yTmpTmp > 1) {
+        if (pawnToBeating.contains(_boardStateTmp(xTmpTmp - 1)(yTmpTmp - 1)) && _boardStateTmp(xTmpTmp - 2)(yTmpTmp - 2) == EMPTY && _boardStateTmp(xTmpTmp)(yTmpTmp) == EMPTY) {
+          checkSingleBeating(-1,-1)
+        }
+        xTmpTmp-=1
+        yTmpTmp-=1
+      }
+
+      xTmpTmp=xTmp
+      yTmpTmp=yTmp
+      while (xTmpTmp > 1 && yTmpTmp < 6) {
+        if (pawnToBeating.contains(_boardStateTmp(xTmpTmp - 1)(yTmpTmp + 1)) && _boardStateTmp(xTmpTmp - 2)(yTmpTmp + 2) == EMPTY && _boardStateTmp(xTmpTmp)(yTmpTmp) == EMPTY) {
+          checkSingleBeating(-1,1)
+        }
+        xTmpTmp-=1
+        yTmpTmp+=1
+      }
+
+      if(isEndBeatings){
+        val endingPointOfPawn = new Point2D(xTmpTmp,yTmpTmp)
+        listOfBeatings += listOfPawnToRemove.toList -> endingPointOfPawn
+        listOfPawnToRemove.clear()
+      }
+    }
+    checkBeating(_boardState,x,y,listOfPawnToRemove);
+    listOfBeatings
+  }
+
 
   def getBeatingForPawn(x:Int,y:Int): scala.collection.mutable.Map[List[Point2D], Point2D] ={
     var listOfBeatings = scala.collection.mutable.Map[List[Point2D], Point2D]()
