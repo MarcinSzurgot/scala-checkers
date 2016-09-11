@@ -27,7 +27,7 @@
     -fx-font-weight: bold;
     -fx-text-fill: white;
     -fx-effect: dropshadow( three-pass-box , rgba(255,255,255,0.2) , 1, 0.0 , 0 , 1);
--}
+}
 .button:hover{
 	-fx-background-color: linear-gradient(#706e6a, #888888);
 }
@@ -48,25 +48,25 @@
 	-fx-background-color: #00EE00;
 }
 .blackPawn {
-	-fx-background-image: url("../Resources/300/bp.png");
+	-fx-background-image: url("300/bp.png");
 	-fx-background-repeat: no-repeat;
     -fx-background-position: center;
     -fx-background-size: 5em,5em;
 }
 .blackQueen {
-	-fx-background-image: url("../Resources/300/bq.png");
+	-fx-background-image: url("300/bq.png");
 	-fx-background-repeat: no-repeat;
     -fx-background-position: center;
     -fx-background-size: 5em,5em;
 }
 .whitePawn {
-	-fx-background-image: url("../Resources/300/wp.png");
+	-fx-background-image: url("300/wp.png");
 	-fx-background-repeat: no-repeat;
     -fx-background-position: center;
     -fx-background-size: 5em,5em;
 }
 .whiteQueen {
-	-fx-background-image: url("../Resources/300/wq.png");
+	-fx-background-image: url("300/wq.png");
 	-fx-background-repeat: no-repeat;
     -fx-background-position: center;
     -fx-background-size: 5em,5em;
