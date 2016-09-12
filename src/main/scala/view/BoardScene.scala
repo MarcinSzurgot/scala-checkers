@@ -33,11 +33,7 @@ class BoardScene extends Scene
             styleClass += convertPawnTypeToCssClass(tempBoard.getPawn(a-1,i-1))
           }
           onMouseClicked = (me: MouseEvent) => {
-            if(styleClass.contains("selected")) {
-              styleClass -= "selected"
-            } else {
-              styleClass += "selected"
-            }
+            game.takeAction(a-1,i-1)
           }
         }
         board(i-1)(a-1) = boardPiece
@@ -47,8 +43,9 @@ class BoardScene extends Scene
   }
 
   def updatePosition(startPoint: Point2D, endPoint: Point2D): Unit = {
-    clearAllPawns(board(endPoint.x.toInt)(endPoint.y.toInt))
-    board(endPoint.x.toInt)(endPoint.y.toInt).styleClass += getStartingStyleClass(board(startPoint.x.toInt)(startPoint.y.toInt));
+    clearAllPawns(board(endPoint.y.toInt)(endPoint.x.toInt))
+    board(endPoint.y.toInt)(endPoint.x.toInt).styleClass += getStartingStyleClass(board(startPoint.y.toInt)(startPoint.x.toInt))
+    clearAllPawns(board(startPoint.y.toInt)(startPoint.x.toInt))
   }
 
   def clearSelected(): Unit = {
@@ -104,5 +101,9 @@ class BoardScene extends Scene
       return "whiteQueen"
     }
     "None"
+  }
+
+  def markSelectedField(moves : List[Point2D]): Unit ={
+    moves.foreach{e => board(e.y.toInt)(e.x.toInt).styleClass += "selected"}
   }
 }

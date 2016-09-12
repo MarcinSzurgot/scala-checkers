@@ -20,7 +20,6 @@ class Board(var _boardState: Array[Array[PawnType]]) {
     var listOfBeatings = scala.collection.mutable.Map[List[Point2D], Point2D]()
     var listOfPawnToRemove = new ListBuffer[Point2D]
     var pawnToBeating = new ListBuffer[PawnType]
-
     if(_boardState(x)(y) == WHITE_PROMOTED) {
       pawnToBeating += BLACK
       pawnToBeating += BLACK_PROMOTED
