@@ -134,4 +134,14 @@ class BoardTest extends FunSuite with BeforeAndAfterEach {
     assert(testPawn==board.getPawn(endingPoint.x.toInt,endingPoint.y.toInt))
   }
 
+  test("getMovesWithSingleBeatings"){
+    board.setPawn(4,5,PawnType.WHITE_PROMOTED)
+    board.setPawn(2,1,PawnType.EMPTY)
+    board.setPawn(3,2,PawnType.WHITE)
+    board.setPawn(5,4,PawnType.BLACK_PROMOTED)
+    board.printBoardState()
+    print(board.getMovesWithSingleBeatings(5,4))
+    assert(board.getMovesWithSingleBeatings(5,4).nonEmpty)
+  }
+
 }

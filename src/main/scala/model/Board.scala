@@ -10,6 +10,187 @@ import main.scala.model.PawnType._
   */
 class Board(var _boardState: Array[Array[PawnType]]) {
 
+  def getMovesWithSingleBeatings(x : Int, y : Int): List[Pair[Point2D,Point2D]] ={
+   val moves :List[Pair[Point2D,Point2D]]=getMovesWithSingleBeatingsForWhite(x,y):::getMovesWithSingleBeatingsForBlack(x,y):::getMovesWithSingleBeatingsForPromoted(x,y)
+    moves
+  }
+
+  def getMovesWithSingleBeatingsForWhite(x : Int, y : Int): List[Pair[Point2D,Point2D]] ={
+    var moves = new ListBuffer[Pair[Point2D,Point2D]]
+
+    if(_boardState(x)(y)==WHITE) {
+      var pawnToBeating = new ListBuffer[PawnType]
+      pawnToBeating += BLACK
+      pawnToBeating += BLACK_PROMOTED
+
+      if (x + 1 < 8) {
+        if ((y + 1 < 8) && (_boardState(x + 1)(y + 1) == EMPTY)) {
+          moves.+=(new Pair(new Point2D(x+1,y+1), null))
+        }else if(x+2<8 && y+2<8 && pawnToBeating.contains(_boardState(x+1)(y+1)) && _boardState(x+2)(y+2)==EMPTY){
+          moves.+=(new Pair(new Point2D(x+2,y+2), new Point2D(x+1,y+1)))
+        }
+
+        if ((y - 1 >= 0) && (_boardState(x + 1)(y - 1) == EMPTY)) {
+          moves.+=(new Pair(new Point2D(x + 1, y - 1),null))
+        }else if(x+2<8 && y-2>=0 && pawnToBeating.contains(_boardState(x+1)(y-1)) && _boardState(x+2)(y-2)==EMPTY){
+          moves.+=(new Pair(new Point2D(x+2,y-2), new Point2D(x+1,y-1)))
+        }
+      }
+      if(x-2>=0 && y-2>=0 && pawnToBeating.contains(_boardState(x-1)(y-1)) && _boardState(x-2)(y-2)==EMPTY){
+        moves.+=(new Pair(new Point2D(x-2,y-2), new Point2D(x-1,y-1)))
+      }
+      if(x-2>=0 && y+2<8 && pawnToBeating.contains(_boardState(x-1)(y+1)) && _boardState(x-2)(y+2)==EMPTY){
+        moves.+=(new Pair(new Point2D(x-2,y+2), new Point2D(x-1,y+1)))
+      }
+    }
+    moves.toList
+  }
+
+  def getMovesWithSingleBeatingsForBlack(x : Int, y : Int): List[Pair[Point2D,Point2D]] ={
+    var moves = new ListBuffer[Pair[Point2D,Point2D]]
+
+    if(_boardState(x)(y)==BLACK) {
+      var pawnToBeating = new ListBuffer[PawnType]
+      pawnToBeating += WHITE
+      pawnToBeating += WHITE_PROMOTED
+
+
+      if (x - 1 >= 0) {
+        if ((y + 1 < 8) && (_boardState(x - 1)(y + 1) == EMPTY)) {
+          moves.+=(new Pair(new Point2D(x-1,y+1), null))
+        }else if(x-2<8 && y+2<8 && pawnToBeating.contains(_boardState(x-1)(y+1)) && _boardState(x-2)(y+2)==EMPTY){
+          moves.+=(new Pair(new Point2D(x-2,y+2), new Point2D(x-1,y+1)))
+        }
+
+        if ((y - 1 >= 0) && (_boardState(x - 1)(y - 1) == EMPTY)) {
+          moves.+=(new Pair(new Point2D(x - 1, y - 1),null))
+        }else if(x-2<8 && y-2>=0 && pawnToBeating.contains(_boardState(x-1)(y-1)) && _boardState(x-2)(y-2)==EMPTY){
+          moves.+=(new Pair(new Point2D(x-2,y-2), new Point2D(x-1,y-1)))
+        }
+      }
+      if(x+2<8 && y-2>=0 && pawnToBeating.contains(_boardState(x+1)(y-1)) && _boardState(x+2)(y-2)==EMPTY){
+        moves.+=(new Pair(new Point2D(x+2,y-2), new Point2D(x+1,y-1)))
+      }
+      if(x+2<8 && y+2<8 && pawnToBeating.contains(_boardState(x+1)(y+1)) && _boardState(x+2)(y+2)==EMPTY){
+        moves.+=(new Pair(new Point2D(x+2,y+2), new Point2D(x+1,y+1)))
+      }
+    }
+    moves.toList
+  }
+
+  def getMovesWithSingleBeatingsForPromoted(x : Int, y : Int): List[Pair[Point2D,Point2D]] ={
+    var moves :List[Pair[Point2D,Point2D]]= List()
+
+    if(_boardState(x)(y)==WHITE_PROMOTED || _boardState(x)(y)==BLACK_PROMOTED) {
+      var pawnToBeating = new ListBuffer[PawnType]
+      if (_boardState(x)(y) == WHITE_PROMOTED) {
+        pawnToBeating += BLACK
+        pawnToBeating += BLACK_PROMOTED
+      } else if (_boardState(x)(y) == BLACK_PROMOTED) {
+        pawnToBeating += WHITE
+        pawnToBeating += WHITE_PROMOTED
+      }
+
+      var xTmp=x+1
+      var yTmp=y+1
+      var lastX = x
+      var lastY = y
+      var movesTmp = new ListBuffer[Pair[Point2D,Point2D]]
+      while (xTmp<8 && yTmp<8 && _boardState(xTmp)(yTmp)==EMPTY){
+        movesTmp.+=(new Pair(new Point2D(xTmp,yTmp),null))
+        xTmp +=1
+        yTmp +=1
+      }
+      if(movesTmp.isEmpty){
+        lastX=x
+        lastY=y
+      }else{
+        lastX = movesTmp.last.x._1.x.toInt
+        lastY = movesTmp.last.x._1.y.toInt
+      }
+      if(lastX+2<8 && lastY+2<8 && pawnToBeating.contains(_boardState(lastX+1)(lastY+1)) && _boardState(lastX+2)(lastY+2)==EMPTY){
+        movesTmp.+=(new Pair(new Point2D(lastX+2,lastY+2),new Point2D(lastX+1,lastY+1)))
+      }
+      moves = moves ::: movesTmp.toList
+      movesTmp.clear()
+
+
+
+      xTmp=x+1
+      yTmp=y-1
+      while (xTmp<8 && yTmp>=0 && _boardState(xTmp)(yTmp)==EMPTY){
+        movesTmp.+=(new Pair(new Point2D(xTmp,yTmp),null))
+        xTmp +=1
+        yTmp -=1
+      }
+      if(movesTmp.isEmpty){
+        lastX=x
+        lastY=y
+      }else{
+        lastX = movesTmp.last.x._1.x.toInt
+        lastY = movesTmp.last.x._1.y.toInt
+      }
+      if(lastX+2<8 && lastY-2>=0 && pawnToBeating.contains(_boardState(lastX+1)(lastY-1)) && _boardState(lastX+2)(lastY-2)==EMPTY){
+        movesTmp.+=(new Pair(new Point2D(lastX+2,lastY-2),new Point2D(lastX+1,lastY-1)))
+      }
+      moves = moves ::: movesTmp.toList
+      movesTmp.clear()
+
+
+
+      xTmp=x-1
+      yTmp=y-1
+      while (xTmp>=0 && yTmp>=0 && _boardState(xTmp)(yTmp)==EMPTY){
+        movesTmp.+=(new Pair(new Point2D(xTmp,yTmp),null))
+        xTmp -=1
+        yTmp -=1
+      }
+      if(movesTmp.isEmpty){
+        lastX=x
+        lastY=y
+      }else{
+        lastX = movesTmp.last.x._1.x.toInt
+        lastY = movesTmp.last.x._1.y.toInt
+      }
+      if(lastX-2>=0 && lastY-2>=0 && pawnToBeating.contains(_boardState(lastX-1)(lastY-1)) && _boardState(lastX-2)(lastY-2)==EMPTY){
+        movesTmp.+=(new Pair(new Point2D(lastX-2,lastY-2),new Point2D(lastX-1,lastY-1)))
+      }
+      moves = moves ::: movesTmp.toList
+      movesTmp.clear()
+
+
+
+      xTmp=x-1
+      yTmp=y+1
+      while (xTmp>=0 && yTmp<8 && _boardState(xTmp)(yTmp)==EMPTY){
+        movesTmp.+=(new Pair(new Point2D(xTmp,yTmp),null))
+        xTmp -=1
+        yTmp +=1
+      }
+      if(movesTmp.isEmpty){
+        lastX=x
+        lastY=y
+      }else{
+        lastX = movesTmp.last.x._1.x.toInt
+        lastY = movesTmp.last.x._1.y.toInt
+      }
+      if(lastX-2>=0 && lastY+2<8 && pawnToBeating.contains(_boardState(lastX-1)(lastY+1)) && _boardState(lastX-2)(lastY+2)==EMPTY){
+        movesTmp.+=(new Pair(new Point2D(lastX-2,lastY+2),new Point2D(lastX-1,lastY+1)))
+      }
+      moves = moves ::: movesTmp.toList
+      movesTmp.clear()
+
+    }
+
+    moves
+  }
+
+
+
+
+
+
+
 
   def makeBeat(pawn:Point2D,pawnsToRemove:List[Point2D],endingPoint:Point2D):Unit ={
     pawnsToRemove.foreach(e=> _boardState(e.x.toInt)(e.y.toInt)=EMPTY)
