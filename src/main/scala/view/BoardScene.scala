@@ -15,7 +15,6 @@ class BoardScene extends Scene
   final val BOARD_LENGTH = 8
   final val START_POS = 1
 
-  //val gameController = new Game();
   var board = Array.ofDim[StackPane](BOARD_LENGTH, BOARD_LENGTH)
   val game = new Game(this)
 
