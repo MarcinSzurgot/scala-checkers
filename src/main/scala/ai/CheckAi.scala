@@ -5,6 +5,7 @@ import main.scala.model.PawnType._
 import main.scala.model.PawnType
 import scalafx.geometry.Point2D
 import scala.math._;
+import main.scala.model.Board
 
 class CheckAi(var board: Board, val player: Player) {
   import CheckAi._;

@@ -1,435 +1,392 @@
 package main.scala.model
 
-import scala.annotation.tailrec
-import scala.collection.mutable.ListBuffer
-import scalafx.geometry.Point2D
+import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.Stack
+import main.scala.ai.Player
 import main.scala.model.PawnType._
+import main.scala.model.Move
+import main.scala.model.Position
 
-/**
-  * Created by bzielinski91 on 28.08.2016.
-  */
-class Board(var _boardState: Array[Array[PawnType]]) {
+class Board(var state: Array[Array[PawnType]]) {
 
-  def getMovesWithSingleBeatings(x : Int, y : Int): List[Pair[Point2D,Point2D]] ={
-   val moves :List[Pair[Point2D,Point2D]]=getMovesWithSingleBeatingsForWhite(x,y):::getMovesWithSingleBeatingsForBlack(x,y):::getMovesWithSingleBeatingsForPromoted(x,y)
-    moves
+  import Board._;
+
+  val blackCount = state.foldLeft(0)((l, r) => l + r.count(isBlack(_)));
+  val whiteCount = state.foldLeft(0)((l, r) => l + r.count(isWhite(_)));
+
+  private var blackLeft = blackCount;
+  private var whiteLeft = whiteCount;
+  private var currentPlayer = Player.WHITE;
+
+  private var availBeat = false;
+  private var actionArray: ActionArray = null;
+  private var allMoves: Action = null;
+  private var previous: PreviousMoves = null;
+
+  updateMoves();
+
+  def this(rows: Int, cols: Int, pawnRows: Int) {
+    this(Board.createBoardArray(cols, rows, pawnRows));
   }
 
-  def getMovesWithSingleBeatingsForWhite(x : Int, y : Int): List[Pair[Point2D,Point2D]] ={
-    var moves = new ListBuffer[Pair[Point2D,Point2D]]
+  def getRowsCount(): Int = {
+    return state.length;
+  }
 
-    if(_boardState(x)(y)==WHITE) {
-      var pawnToBeating = new ListBuffer[PawnType]
-      pawnToBeating += BLACK
-      pawnToBeating += BLACK_PROMOTED
+  def getColsCount(): Int = state.length match {
+    case 0 => return 0;
+    case _ => return state(0).length;
+  }
 
-      if (x + 1 < 8) {
-        if ((y + 1 < 8) && (_boardState(x + 1)(y + 1) == EMPTY)) {
-          moves.+=(new Pair(new Point2D(x+1,y+1), null))
-        }else if(x+2<8 && y+2<8 && pawnToBeating.contains(_boardState(x+1)(y+1)) && _boardState(x+2)(y+2)==EMPTY){
-          moves.+=(new Pair(new Point2D(x+2,y+2), new Point2D(x+1,y+1)))
-        }
+  def getCurrentPlayer(): Player.Player = {
+    return currentPlayer
+  }
 
-        if ((y - 1 >= 0) && (_boardState(x + 1)(y - 1) == EMPTY)) {
-          moves.+=(new Pair(new Point2D(x + 1, y - 1),null))
-        }else if(x+2<8 && y-2>=0 && pawnToBeating.contains(_boardState(x+1)(y-1)) && _boardState(x+2)(y-2)==EMPTY){
-          moves.+=(new Pair(new Point2D(x+2,y-2), new Point2D(x+1,y-1)))
-        }
-      }
-      if(x-2>=0 && y-2>=0 && pawnToBeating.contains(_boardState(x-1)(y-1)) && _boardState(x-2)(y-2)==EMPTY){
-        moves.+=(new Pair(new Point2D(x-2,y-2), new Point2D(x-1,y-1)))
-      }
-      if(x-2>=0 && y+2<8 && pawnToBeating.contains(_boardState(x-1)(y+1)) && _boardState(x-2)(y+2)==EMPTY){
-        moves.+=(new Pair(new Point2D(x-2,y+2), new Point2D(x-1,y+1)))
+  def getMoves(row: Int, col: Int): Action = {
+    return actionArray(row)(col);
+  }
+
+  def getAllMoves(): Action = {
+    return allMoves;
+  }
+  
+  def getPawn(row: Int, col: Int): PawnType = {
+    return state(row)(col);
+  }
+  
+  def getPawn(pos: Position): PawnType = {
+    return getPawn(pos.row, pos.col);
+  }
+
+  def undoMove(update: Boolean) {
+    val undo = previous.pop();
+    val (beg, end) = (undo._1.begin, undo._1.end);
+    val beat = undo._2;
+
+    val tmp = state(end.row)(end.col);
+    state(end.row)(end.col) = EMPTY;
+    if (!undo._3) {
+      state(beg.row)(beg.col) = tmp;
+    } else {
+      tmp match {
+        case WHITE_PROMOTED => state(beg.row)(beg.col) = WHITE;
+        case BLACK_PROMOTED => state(beg.row)(beg.col) = BLACK;
       }
     }
-    moves.toList
+
+    if (beat != null) {
+      state(beat._1.row)(beat._1.col) = beat._2;
+      changeState(beat._1, beat._2);
+    }
+
+    togglePlayer();
+    
+    if(update){
+      updateMoves();
+    }
+  }
+  
+  def undoMove(){
+    undoMove(true);
   }
 
-  def getMovesWithSingleBeatingsForBlack(x : Int, y : Int): List[Pair[Point2D,Point2D]] ={
-    var moves = new ListBuffer[Pair[Point2D,Point2D]]
+  def makeMove(move: Move): Boolean = {
+    return makeMove(move, true);
+  }
 
-    if(_boardState(x)(y)==BLACK) {
-      var pawnToBeating = new ListBuffer[PawnType]
-      pawnToBeating += WHITE
-      pawnToBeating += WHITE_PROMOTED
-
-
-      if (x - 1 >= 0) {
-        if ((y + 1 < 8) && (_boardState(x - 1)(y + 1) == EMPTY)) {
-          moves.+=(new Pair(new Point2D(x-1,y+1), null))
-        }else if(x-2<8 && y+2<8 && pawnToBeating.contains(_boardState(x-1)(y+1)) && _boardState(x-2)(y+2)==EMPTY){
-          moves.+=(new Pair(new Point2D(x-2,y+2), new Point2D(x-1,y+1)))
-        }
-
-        if ((y - 1 >= 0) && (_boardState(x - 1)(y - 1) == EMPTY)) {
-          moves.+=(new Pair(new Point2D(x - 1, y - 1),null))
-        }else if(x-2<8 && y-2>=0 && pawnToBeating.contains(_boardState(x-1)(y-1)) && _boardState(x-2)(y-2)==EMPTY){
-          moves.+=(new Pair(new Point2D(x-2,y-2), new Point2D(x-1,y-1)))
-        }
+  def makeMove(move: Move, update: Boolean): Boolean = {
+    val beg = getMoves(move.begin.row, move.begin.col);
+    if (beg != null) {
+      val i = beg._1.indexOf(move);
+      if (i == -1) {
+        return false;
+      } else {
+        makeMoveUnchecked(move, beg._2(i), update);
+        return true;
       }
-      if(x+2<8 && y-2>=0 && pawnToBeating.contains(_boardState(x+1)(y-1)) && _boardState(x+2)(y-2)==EMPTY){
-        moves.+=(new Pair(new Point2D(x+2,y-2), new Point2D(x+1,y-1)))
-      }
-      if(x+2<8 && y+2<8 && pawnToBeating.contains(_boardState(x+1)(y+1)) && _boardState(x+2)(y+2)==EMPTY){
-        moves.+=(new Pair(new Point2D(x+2,y+2), new Point2D(x+1,y+1)))
+    } else {
+      return false;
+    }
+  }
+
+  def updateMoves() {
+    clear();
+
+    for (row <- 0 until getRowsCount()) {
+      for (col <- 0 until getColsCount()) {
+        if ((isWhite(row, col) && currentPlayer == Player.WHITE) ||
+          (isBlack(row, col) && currentPlayer == Player.BLACK)) {
+          checkPawn(row, col);
+        }
       }
     }
-    moves.toList
+  }
+  
+  def getBlackLeft(): Int = {
+    return blackLeft;
   }
 
-  def getMovesWithSingleBeatingsForPromoted(x : Int, y : Int): List[Pair[Point2D,Point2D]] ={
-    var moves :List[Pair[Point2D,Point2D]]= List()
+  def getWhiteLeft(): Int = {
+    return whiteLeft;
+  }
 
-    if(_boardState(x)(y)==WHITE_PROMOTED || _boardState(x)(y)==BLACK_PROMOTED) {
-      var pawnToBeating = new ListBuffer[PawnType]
-      if (_boardState(x)(y) == WHITE_PROMOTED) {
-        pawnToBeating += BLACK
-        pawnToBeating += BLACK_PROMOTED
-      } else if (_boardState(x)(y) == BLACK_PROMOTED) {
-        pawnToBeating += WHITE
-        pawnToBeating += WHITE_PROMOTED
+  override def toString(): String = {
+    var builder = StringBuilder.newBuilder;
+    state.foreach { row =>
+      row.foreach { pawn =>
+        builder.append(pawn);
+        builder.append(" ");
       }
+      builder.append("\n");
+    }
+    return builder.toString();
+  }
+  
+  override def equals(a: Any): Boolean = a match {
+    case that: Board => that.state.deep == state.deep;
+    case _ => false;
+  }
+  
+  def reset(){
+    while(previous.nonEmpty){
+      undoMove(false);
+    }
+  }
 
-      var xTmp=x+1
-      var yTmp=y+1
-      var lastX = x
-      var lastY = y
-      var movesTmp = new ListBuffer[Pair[Point2D,Point2D]]
-      while (xTmp<8 && yTmp<8 && _boardState(xTmp)(yTmp)==EMPTY){
-        movesTmp.+=(new Pair(new Point2D(xTmp,yTmp),null))
-        xTmp +=1
-        yTmp +=1
-      }
-      if(movesTmp.isEmpty){
-        lastX=x
-        lastY=y
+  private def changeState(pow: Position, pawn: PawnType) {
+    val tmp = state(pow.row)(pow.col);
+    state(pow.row)(pow.col) = pawn;
+    
+    if(pawn == EMPTY){
+      if(isWhite(tmp)){
+        whiteLeft -= 1;
       }else{
-        lastX = movesTmp.last.x._1.x.toInt
-        lastY = movesTmp.last.x._1.y.toInt
+        blackLeft -= 1;
       }
-      if(lastX+2<8 && lastY+2<8 && pawnToBeating.contains(_boardState(lastX+1)(lastY+1)) && _boardState(lastX+2)(lastY+2)==EMPTY){
-        movesTmp.+=(new Pair(new Point2D(lastX+2,lastY+2),new Point2D(lastX+1,lastY+1)))
-      }
-      moves = moves ::: movesTmp.toList
-      movesTmp.clear()
-
-
-
-      xTmp=x+1
-      yTmp=y-1
-      while (xTmp<8 && yTmp>=0 && _boardState(xTmp)(yTmp)==EMPTY){
-        movesTmp.+=(new Pair(new Point2D(xTmp,yTmp),null))
-        xTmp +=1
-        yTmp -=1
-      }
-      if(movesTmp.isEmpty){
-        lastX=x
-        lastY=y
+    }else{
+      if(isWhite(pawn)){
+        whiteLeft += 1;
       }else{
-        lastX = movesTmp.last.x._1.x.toInt
-        lastY = movesTmp.last.x._1.y.toInt
-      }
-      if(lastX+2<8 && lastY-2>=0 && pawnToBeating.contains(_boardState(lastX+1)(lastY-1)) && _boardState(lastX+2)(lastY-2)==EMPTY){
-        movesTmp.+=(new Pair(new Point2D(lastX+2,lastY-2),new Point2D(lastX+1,lastY-1)))
-      }
-      moves = moves ::: movesTmp.toList
-      movesTmp.clear()
-
-
-
-      xTmp=x-1
-      yTmp=y-1
-      while (xTmp>=0 && yTmp>=0 && _boardState(xTmp)(yTmp)==EMPTY){
-        movesTmp.+=(new Pair(new Point2D(xTmp,yTmp),null))
-        xTmp -=1
-        yTmp -=1
-      }
-      if(movesTmp.isEmpty){
-        lastX=x
-        lastY=y
-      }else{
-        lastX = movesTmp.last.x._1.x.toInt
-        lastY = movesTmp.last.x._1.y.toInt
-      }
-      if(lastX-2>=0 && lastY-2>=0 && pawnToBeating.contains(_boardState(lastX-1)(lastY-1)) && _boardState(lastX-2)(lastY-2)==EMPTY){
-        movesTmp.+=(new Pair(new Point2D(lastX-2,lastY-2),new Point2D(lastX-1,lastY-1)))
-      }
-      moves = moves ::: movesTmp.toList
-      movesTmp.clear()
-
-
-
-      xTmp=x-1
-      yTmp=y+1
-      while (xTmp>=0 && yTmp<8 && _boardState(xTmp)(yTmp)==EMPTY){
-        movesTmp.+=(new Pair(new Point2D(xTmp,yTmp),null))
-        xTmp -=1
-        yTmp +=1
-      }
-      if(movesTmp.isEmpty){
-        lastX=x
-        lastY=y
-      }else{
-        lastX = movesTmp.last.x._1.x.toInt
-        lastY = movesTmp.last.x._1.y.toInt
-      }
-      if(lastX-2>=0 && lastY+2<8 && pawnToBeating.contains(_boardState(lastX-1)(lastY+1)) && _boardState(lastX-2)(lastY+2)==EMPTY){
-        movesTmp.+=(new Pair(new Point2D(lastX-2,lastY+2),new Point2D(lastX-1,lastY+1)))
-      }
-      moves = moves ::: movesTmp.toList
-      movesTmp.clear()
-
-    }
-
-    moves
-  }
-
-
-
-
-
-
-
-
-  def makeBeat(pawn:Point2D,pawnsToRemove:List[Point2D],endingPoint:Point2D):Unit ={
-    pawnsToRemove.foreach(e=> _boardState(e.x.toInt)(e.y.toInt)=EMPTY)
-    move(pawn,endingPoint)
-  }
-
-  def getBeatingForPromotedPawn(x:Int,y:Int): scala.collection.mutable.Map[List[Point2D], Point2D] ={
-    var listOfBeatings = scala.collection.mutable.Map[List[Point2D], Point2D]()
-    var listOfPawnToRemove = new ListBuffer[Point2D]
-    var pawnToBeating = new ListBuffer[PawnType]
-    if(_boardState(x)(y) == WHITE_PROMOTED) {
-      pawnToBeating += BLACK
-      pawnToBeating += BLACK_PROMOTED
-    }
-    if(_boardState(x)(y) == BLACK_PROMOTED) {
-      pawnToBeating += WHITE
-      pawnToBeating += WHITE_PROMOTED
-    }
-    def checkBeating(_boardStateTmp: Array[Array[PawnType]], xTmp:Int, yTmp:Int, listOfPawnToRemove:ListBuffer[Point2D]) {
-      var isEndBeatings: Boolean = true
-      var xTmpTmp=xTmp
-      var yTmpTmp=yTmp
-
-      def checkSingleBeating(vertical:Int,horizontal:Int): Unit ={
-        var _boardStateTmpTmp: Array[Array[PawnType]] =_boardStateTmp.map(_.clone())
-        _boardStateTmpTmp(xTmpTmp + vertical)(yTmpTmp + horizontal) = EMPTY
-        _boardStateTmpTmp(xTmpTmp + (vertical*2))(yTmpTmp + (horizontal*2)) = _boardStateTmpTmp(xTmpTmp)(yTmpTmp)
-        _boardStateTmpTmp(xTmpTmp)(yTmpTmp) = EMPTY
-        var listOfPawnToRemoveTmp = listOfPawnToRemove
-        listOfPawnToRemoveTmp.+=(new Point2D(xTmpTmp + vertical, yTmpTmp + horizontal))
-        isEndBeatings = false
-        checkBeating(_boardStateTmpTmp, xTmpTmp + (vertical*2), yTmpTmp + (horizontal*2), listOfPawnToRemoveTmp);
-      }
-
-      while (xTmpTmp < 6 && yTmpTmp < 6) {
-        if (pawnToBeating.contains(_boardStateTmp(xTmpTmp + 1)(yTmpTmp + 1)) && _boardStateTmp(xTmpTmp + 2)(yTmpTmp + 2) == EMPTY && _boardStateTmp(xTmpTmp)(yTmpTmp) == EMPTY) {
-          checkSingleBeating(1, 1)
-        }
-        xTmpTmp+=1
-        yTmpTmp+=1
-      }
-
-      xTmpTmp=xTmp
-      yTmpTmp=yTmp
-      while (xTmpTmp < 6 && yTmpTmp > 1) {
-        if (pawnToBeating.contains(_boardStateTmp(xTmpTmp + 1)(yTmpTmp - 1)) && _boardStateTmp(xTmpTmp + 2)(yTmpTmp - 2) == EMPTY && _boardStateTmp(xTmpTmp)(yTmpTmp) == EMPTY) {
-          checkSingleBeating(1,-1)
-        }
-        xTmpTmp+=1
-        yTmpTmp-=1
-      }
-
-      xTmpTmp=xTmp
-      yTmpTmp=yTmp
-      while (xTmpTmp > 1 && yTmpTmp > 1) {
-        if (pawnToBeating.contains(_boardStateTmp(xTmpTmp - 1)(yTmpTmp - 1)) && _boardStateTmp(xTmpTmp - 2)(yTmpTmp - 2) == EMPTY && _boardStateTmp(xTmpTmp)(yTmpTmp) == EMPTY) {
-          checkSingleBeating(-1,-1)
-        }
-        xTmpTmp-=1
-        yTmpTmp-=1
-      }
-
-      xTmpTmp=xTmp
-      yTmpTmp=yTmp
-      while (xTmpTmp > 1 && yTmpTmp < 6) {
-        if (pawnToBeating.contains(_boardStateTmp(xTmpTmp - 1)(yTmpTmp + 1)) && _boardStateTmp(xTmpTmp - 2)(yTmpTmp + 2) == EMPTY && _boardStateTmp(xTmpTmp)(yTmpTmp) == EMPTY) {
-          checkSingleBeating(-1,1)
-        }
-        xTmpTmp-=1
-        yTmpTmp+=1
-      }
-
-      if(isEndBeatings){
-        val endingPointOfPawn = new Point2D(xTmpTmp,yTmpTmp)
-        listOfBeatings += listOfPawnToRemove.toList -> endingPointOfPawn
-        listOfPawnToRemove.clear()
+        blackLeft += 1;
       }
     }
-    checkBeating(_boardState,x,y,listOfPawnToRemove);
-    listOfBeatings
   }
 
+  private def makeMoveUnchecked(move: Move, beat: Beat, update: Boolean) {
+    val (b, e) = (move.begin, move.end);
+    val tmp = state(b.row)(b.col);
 
-  def getBeatingForPawn(x:Int,y:Int): scala.collection.mutable.Map[List[Point2D], Point2D] ={
-    var listOfBeatings = scala.collection.mutable.Map[List[Point2D], Point2D]()
-    var listOfPawnToRemove = new ListBuffer[Point2D]
-    var pawnToBeating = new ListBuffer[PawnType]
+    state(b.row)(b.col) = EMPTY;
+    state(e.row)(e.col) = tmp;
 
-    if(_boardState(x)(y) == WHITE) {
-      pawnToBeating += BLACK
-      pawnToBeating += BLACK_PROMOTED
+    if (beat != null) {
+      changeState(beat._1, EMPTY);
     }
-    if(_boardState(x)(y) == BLACK) {
-      pawnToBeating += WHITE
-      pawnToBeating += WHITE_PROMOTED
-    }
-    def checkBeating(_boardStateTmp: Array[Array[PawnType]], xTmp:Int, yTmp:Int, listOfPawnToRemove:ListBuffer[Point2D]) {
-      var isEndBeatings: Boolean = true
 
-      def checkSingleBeating(vertical:Int,horizontal:Int): Unit ={
-        var _boardStateTmpTmp: Array[Array[PawnType]] =_boardStateTmp.map(_.clone())
-        _boardStateTmpTmp(xTmp + vertical)(yTmp + horizontal) = EMPTY
-        _boardStateTmpTmp(xTmp + (vertical*2))(yTmp + (horizontal*2)) = _boardStateTmpTmp(xTmp)(yTmp)
-        _boardStateTmpTmp(xTmp)(yTmp) = EMPTY
-        var listOfPawnToRemoveTmp = listOfPawnToRemove
-        listOfPawnToRemoveTmp.+=(new Point2D(xTmp + vertical, yTmp + horizontal))
-        isEndBeatings = false
-        checkBeating(_boardStateTmpTmp, xTmp + (vertical*2), yTmp + (horizontal*2), listOfPawnToRemoveTmp);
-      }
-      if (xTmp < 6 && yTmp < 6) {
-        if (pawnToBeating.contains(_boardStateTmp(xTmp + 1)(yTmp + 1)) && _boardStateTmp(xTmp + 2)(yTmp + 2) == EMPTY) {
-          checkSingleBeating(1,1)
-        }
-      }
-      if (xTmp < 6 && yTmp > 1) {
-        if (pawnToBeating.contains(_boardStateTmp(xTmp + 1)(yTmp - 1)) && _boardStateTmp(xTmp + 2)(yTmp - 2) == EMPTY) {
-          checkSingleBeating(1,-1)
-        }
-      }
-      if (xTmp > 1 && yTmp > 1) {
-        if (pawnToBeating.contains(_boardStateTmp(xTmp - 1)(yTmp - 1)) && _boardStateTmp(xTmp - 2)(yTmp - 2) == EMPTY) {
-          checkSingleBeating(-1,-1)
-        }
-      }
-      if (xTmp > 1 && yTmp < 6) {
-        if (pawnToBeating.contains(_boardStateTmp(xTmp - 1)(yTmp + 1)) && _boardStateTmp(xTmp - 2)(yTmp + 2) == EMPTY) {
-          checkSingleBeating(-1,1)
-        }
-      }
-      if(isEndBeatings){
-        val endingPointOfPawn = new Point2D(xTmp,yTmp)
-        listOfBeatings += listOfPawnToRemove.toList -> endingPointOfPawn
-        listOfPawnToRemove.clear()
-      }
-    }
-    checkBeating(_boardState,x,y,listOfPawnToRemove);
-    listOfBeatings
-  }
+    previous.push((move, beat, checkPromotion(e)));
+    togglePlayer();
 
-
-  def move(startPoint: Point2D, endPoint: Point2D): Unit ={
-    _boardState(endPoint.x.toInt)(endPoint.y.toInt) = _boardState(startPoint.x.toInt)(startPoint.y.toInt)
-    _boardState(startPoint.x.toInt)(startPoint.y.toInt) = EMPTY
-  }
-
-  def getMovesForWHITE(x:Int,y:Int): List[Point2D] ={
-    var listOfMoves = new ListBuffer[Point2D]()
-
-    if(_boardState(x)(y)==WHITE) {
-      if (x + 1 < 8) {
-        if ((y + 1 < 8) && (_boardState(x + 1)(y + 1) == EMPTY)) {
-          listOfMoves.+=(new Point2D(x + 1, y + 1))
-        }
-        if ((y - 1 >= 0) && (_boardState(x + 1)(y - 1) == EMPTY)) {
-          listOfMoves.+=(new Point2D(x + 1, y - 1))
-        }
-      }
-    }
-    listOfMoves.toList
-  }
-
-  def getMovesForBLACK(x:Int,y:Int): List[Point2D] ={
-
-    var listOfMoves = new ListBuffer[Point2D]()
-    if(_boardState(x)(y)==BLACK){
-      if(x-1>=0) {
-        if (y + 1 < 8 && _boardState(x - 1)(y + 1) == EMPTY) {
-          listOfMoves.+=(new Point2D(x - 1, y + 1))
-        }
-        if (y - 1 >= 0 && _boardState(x - 1)(y - 1) == EMPTY) {
-          listOfMoves.+=(new Point2D(x - 1, y - 1))
-        }
-      }
-    }
-    listOfMoves.toList
-  }
-
-  def getMovesForPROMOTED(x:Int,y:Int): List[Point2D] ={
-    var listOfMoves = new ListBuffer[Point2D]()
-    if(_boardState(x)(y)==WHITE_PROMOTED || _boardState(x)(y)==BLACK_PROMOTED) {
-
-      var xTmp=x+1
-      var yTmp=y+1
-      while (xTmp<8 && yTmp<8 && _boardState(xTmp)(yTmp)==EMPTY){
-        listOfMoves.+=(new Point2D(xTmp,yTmp))
-        xTmp +=1
-        yTmp +=1
-      }
-
-      xTmp=x-1
-      yTmp=y-1
-      while (xTmp>=0 && yTmp>=0 && _boardState(xTmp)(yTmp)==EMPTY){
-        listOfMoves.+=(new Point2D(xTmp,yTmp))
-        xTmp -=1
-        yTmp -=1
-      }
-
-      xTmp=x+1
-      yTmp=y-1
-      while (xTmp<8 && yTmp>=0 && _boardState(xTmp)(yTmp)==EMPTY){
-        listOfMoves.+=(new Point2D(xTmp,yTmp))
-        xTmp +=1
-        yTmp -=1
-      }
-
-      xTmp=x-1
-      yTmp=y+1
-      while (xTmp>=0 && yTmp<8 && _boardState(xTmp)(yTmp)==EMPTY){
-        listOfMoves.+=(new Point2D(xTmp,yTmp))
-        xTmp -=1
-        yTmp +=1
-      }
-    }
-    listOfMoves.toList
-  }
-
-  def getMoves(x:Int,y:Int): List[Point2D] ={
-    val listOfMoves: List[Point2D] = getMovesForWHITE(x,y):::getMovesForBLACK(x,y):::getMovesForPROMOTED(x,y)
-    listOfMoves
-  }
-
-  def getPawn(x:Int,y:Int):  PawnType ={
-    _boardState(x)(y)
-  }
-
-  def setPawn(x:Int,y:Int,tp:PawnType): Unit ={
-    _boardState(x)(y)=tp
-  }
-
-  def boardState = _boardState
-
-  def printBoardState(): Unit ={
-    for (i <- 0 to 7) {
-      for (j <- 0 to 7) {
-        print(" " + _boardState(i)(j));
-      }
-      println();
+    if (update) {
+      updateMoves();
     }
   }
 
+  private def checkPromotion(pos: Position): Boolean = {
+    if (state(pos.row)(pos.col) == WHITE && pos.row == getRowsCount() - 1) {
+      state(pos.row)(pos.col) = WHITE_PROMOTED;
+      return true;
+    } else if (state(pos.row)(pos.col) == BLACK && pos.row == 0) {
+      state(pos.row)(pos.col) = BLACK_PROMOTED;
+      return true;
+    } else {
+      return false;
+    }
+  }
 
+  private def checkPawn(row: Int, col: Int) {
+    val steps = getStepsCount(row, col);
+    val up = currentPlayer == Player.WHITE;
+    val pr = isPromoted(row, col);
+    var beat: Beat = null;
+
+    var upw = (x: Boolean, y: Boolean) => x || y; // if current pawn is white or promoted allow him move upward
+    var bck = (x: Boolean, y: Boolean) => !x || y; // if current pawn is black or promoted allow him move backward
+    var add = (x: Int, y: Int) => x + y;
+    var sub = (x: Int, y: Int) => x - y;
+
+    val funcs = List((add, add, upw), (add, sub, upw),
+      (sub, add, bck), (sub, sub, bck));
+
+    funcs.foreach { f =>
+      beat = null;
+      var cont = true;
+      for (s <- 1 to steps) {
+        if (cont) {
+          var res = addMove(row, col, f._1(row, s), f._2(col, s), beat, f._3(up, pr));
+          beat = res._1;
+          cont = res._2;
+        }
+      }
+    }
+  }
+
+  private def addMove(row: Int, col: Int, nrow: Int, ncol: Int, beat: Beat, up: Boolean): (Beat, Boolean) = {
+    val rowc = getRowsCount();
+    val colc = getColsCount();
+    var pos: List[Int] = null;
+
+    if (nrow >= 0 && nrow < rowc && ncol >= 0 && ncol < colc) {
+      if (state(nrow)(ncol) == EMPTY && up) {
+        if (beat != null) {
+          pos = List(row, col, beat._1.row, beat._1.col, nrow, ncol);
+        } else {
+          pos = List(row, col, nrow, ncol);
+        }
+      } else if (isOpposite(nrow, ncol) && beat == null) {
+        val (nnrow, nncol) = (2 * nrow - row, 2 * ncol - col);
+        if (nnrow >= 0 && nnrow < rowc && nncol >= 0 &&
+          nncol < colc && state(nnrow)(nncol) == EMPTY) {
+          pos = List(row, col, nrow, ncol, nnrow, nncol);
+        } else {
+          return (null, false);
+        }
+      } else {
+        return (null, false);
+      }
+      return (addMove(pos), true);
+    } else {
+      return (null, false);
+    }
+  }
+
+  private def addMove(pos: List[Int]): Beat = {
+    var beat: Beat = null;
+    var move: Move = null;
+
+    if (pos.length == 4) {
+      move = new Move(
+        new Position(pos(0), pos(1)),
+        new Position(pos(2), pos(3)));
+      beat = null;
+    } else {
+      setBeat();
+      move = new Move(
+        new Position(pos(0), pos(1)),
+        new Position(pos(4), pos(5)));
+      beat = (new Position(pos(2), pos(3)), state(pos(2))(pos(3)));
+    }
+
+    actionArray(pos(0))(pos(1))._1.append(move);
+    actionArray(pos(0))(pos(1))._2.append(beat);
+
+    allMoves._1.append(move);
+    allMoves._2.append(beat);
+    return beat;
+  }
+
+  private def setBeat() {
+    if (!availBeat) {
+      clear();
+      availBeat = true;
+    }
+  }
+
+  private def clear() {
+    actionArray = Array.ofDim[Action](getRowsCount(), getColsCount());
+    actionArray.foreach { row =>
+      for (col <- 0 until row.length) {
+        row(col) = (ArrayBuffer[Move](), ArrayBuffer[Beat]());
+      }
+    };
+
+    allMoves = (ArrayBuffer[Move](), ArrayBuffer[Beat]());
+    if (previous == null) {
+      previous = new PreviousMoves();
+    }
+
+    availBeat = false;
+  }
+
+  private def togglePlayer() {
+    currentPlayer match {
+      case Player.BLACK => currentPlayer = Player.WHITE;
+      case Player.WHITE => currentPlayer = Player.BLACK;
+    }
+  }
+
+  private def getStepsCount(row: Int, col: Int): Int = isPromoted(row, col) match {
+    case true  => Math.max(getRowsCount(), getColsCount()) - 1;
+    case false => 1;
+  }
+
+  private def isOpposite(row: Int, col: Int): Boolean = {
+    return isWhite(row, col) && currentPlayer == Player.BLACK ||
+      isBlack(row, col) && currentPlayer == Player.WHITE;
+  }
+
+  private def isPromoted(row: Int, col: Int): Boolean = state(row)(col) match {
+    case WHITE_PROMOTED => true;
+    case BLACK_PROMOTED => true;
+    case _              => false;
+  }
+
+  private def isBlack(pawn: PawnType): Boolean = pawn match {
+    case BLACK          => true;
+    case BLACK_PROMOTED => true;
+    case _              => false;
+  }
+
+  private def isWhite(pawn: PawnType): Boolean = pawn match {
+    case WHITE          => true;
+    case WHITE_PROMOTED => true;
+    case _              => false;
+  }
+
+  private def isWhite(row: Int, col: Int): Boolean = state(row)(col) match {
+    case WHITE          => true;
+    case WHITE_PROMOTED => true;
+    case _              => false;
+  }
+
+  private def isBlack(row: Int, col: Int): Boolean = state(row)(col) match {
+    case BLACK          => true;
+    case BLACK_PROMOTED => true;
+    case _              => false;
+  }
+}
+
+object Board {
+  type Beat = (Position, PawnType);
+  type Action = (ArrayBuffer[Move], ArrayBuffer[Beat]);
+  type ActionArray = Array[Array[Action]];
+  type PreviousMoves = Stack[(Move, Beat, Boolean)];
+
+  val DEFAULT_ROWS = 8;
+  val DEFAULT_COLS = 8;
+  val DEFAULT_PAWN_ROWS = 3;
+
+  def apply(): Board = {
+    return Board(DEFAULT_ROWS, DEFAULT_COLS, DEFAULT_PAWN_ROWS);
+  }
+  
+  def apply(rows: Int, cols: Int, pawnRows: Int): Board = {
+    return new Board(createBoardArray(rows, cols, pawnRows));
+  }
+
+  def createBoardArray(rows: Int, cols: Int, pawnRows: Int): Array[Array[PawnType]] = {
+    var board = Array.fill(rows, cols)(EMPTY);
+    val fill = (from: Int, to: Int, tp: PawnType) => {
+      for (y <- from until to) {
+        for (x <- 0 until cols) {
+          if ((x + y) % 2 == 1) {
+            board(y)(x) = null;
+          }
+        }
+      }
+    }
+    fill(0, pawnRows, WHITE);
+    fill(rows - pawnRows, rows, BLACK);
+
+    return null;
+  }
 }

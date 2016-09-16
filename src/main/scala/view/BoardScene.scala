@@ -7,7 +7,7 @@ import scalafx.scene.Scene
 import scalafx.scene.input.MouseEvent
 import main.scala.logic.Game
 import main.scala.model.PawnType
-import main.scala.model.PawnType.PawnType
+import main.scala.model.PawnType
 
 
 class BoardScene extends Scene

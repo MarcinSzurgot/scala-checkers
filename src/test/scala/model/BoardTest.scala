@@ -1,8 +1,9 @@
 package model
 
-import main.scala.model.{PawnType, Board, BoardBuilder}
+import main.scala.model.{Board}
+import main.scala.model.PawnType
+import main.scala.model.Board
 import org.scalatest.{BeforeAndAfterEach, FunSuite}
-
 import scala.collection.mutable.ListBuffer
 import scalafx.geometry.Point2D
 
@@ -10,9 +11,9 @@ import scalafx.geometry.Point2D
   * Created by Matik on 30.08.2016.
   */
 class BoardTest extends FunSuite with BeforeAndAfterEach {
-  var board = new BoardBuilder().createBoard(8,8,3)
+  var board = Board();
   override def beforeEach() {
-    board = new BoardBuilder().createBoard(8,8,3)
+    board = Board
   }
 
   override def afterEach() {

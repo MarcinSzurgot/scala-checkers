@@ -4,9 +4,10 @@ import main.scala.model._
 import main.scala.view.BoardScene
 
 import scala.collection.mutable.ListBuffer
+import main.scala.model.Board
 
 class Game(_boardScene: BoardScene) {
-  private var _board = new BoardBuilder().createBoard(8,8,3)
+  private var _board = Board();
   private var _players: List[PlayerAbstract] = List()
   private var _currentPlayerIndex = 1
   private var _playersCount = 0
@@ -22,7 +23,7 @@ class Game(_boardScene: BoardScene) {
                 pawnRows: Int,
                 playersCount: Int
               ) : Board = {
-    _board = new BoardBuilder().createBoard(boardWidth,boardLength,pawnRows)
+    _board = Board();
     val playerListBuilder = ListBuffer[Player]()
     _playersCount = playersCount
     for( a <- 1 until _playersCount+1){
