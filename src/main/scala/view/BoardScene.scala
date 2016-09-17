@@ -6,8 +6,8 @@ import scalafx.geometry.{HPos, Point2D, VPos}
 import scalafx.scene.Scene
 import scalafx.scene.input.MouseEvent
 import main.scala.logic.Game
-import main.scala.model.PawnType
-import main.scala.model.PawnType
+import main.scala.model.PawnType;
+import main.scala.model.PawnType._;
 
 
 class BoardScene extends Scene

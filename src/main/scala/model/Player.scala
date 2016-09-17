@@ -4,7 +4,6 @@ import main.scala.logic.Game
 import main.scala.view.BoardScene
 
 import scalafx.geometry.Point2D
-import main.scala.model.Board
 
 class Player(_board: Board, _player: Int, _game: Game, _boardScene : BoardScene) extends PlayerAbstract {
 
