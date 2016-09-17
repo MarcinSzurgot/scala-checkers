@@ -82,7 +82,14 @@ class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[Paw
       changeState(beat._1, beat._2);
     }
 
-    togglePlayer();
+    if(previous.nonEmpty){
+      val prev = previous.top._2;
+      if(prev == null || (prev != null && beat != null && prev._2 != beat._2)){
+        togglePlayer();
+      }
+    }else{
+      togglePlayer();
+    }
 
     if (update) {
       updateMoves();
