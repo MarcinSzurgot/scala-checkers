@@ -1,14 +1,11 @@
 package main.scala.ai
 
-import main.scala.ai.Player._
-import main.scala.model.PawnType._
-import main.scala.model.PawnType
-import scalafx.geometry.Point2D
-import scala.math._;
 import main.scala.model.Board
+import main.scala.model.PawnType
+import main.scala.model.PlayerType
 
-class CheckAi(var board: Board, val player: Player) {
-  import CheckAi._;
+class CheckAi(var board: Board, val player: PlayerType.PlayerType) {
+  type PlayerType = PlayerType.PlayerType;
 
   class Points(var black: Int, var white: Int);
   object Points { def zero(): Points = { return new Points(0, 0); } }
@@ -16,9 +13,9 @@ class CheckAi(var board: Board, val player: Player) {
   var points: Points = null;
   var needUpdate: Boolean = true;
 
-  def getPointsFor(player: Player): Int = player match {
-    case Player.WHITE => getPoints().white;
-    case Player.BLACK => getPoints().black;
+  def getPointsFor(player: PlayerType): Int = player match {
+    case PlayerType.WHITE => getPoints().white;
+    case PlayerType.BLACK => getPoints().black;
     case _            => -1;
   }
 

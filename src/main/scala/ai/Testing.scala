@@ -15,6 +15,7 @@ object Testing {
     var board = Board();
     println(board.makeMove(Move(Position(2, 1), Position(3, 0))));
     println(board.makeMove(Move(Position(5, 6), Position(4, 5))));
+    
     println(board.makeMove(Move(Position(3, 0), Position(4, 1))));
     println(board.makeMove(Move(Position(5, 2), Position(3, 0))));
     val test = Move(Position(1, 2), Position(2, 3));

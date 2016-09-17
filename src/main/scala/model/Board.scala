@@ -2,21 +2,25 @@ package main.scala.model
 
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.Stack
-import main.scala.ai.Player
-import main.scala.model.PawnType._
-import main.scala.model.Move
-import main.scala.model.Position
+
+import main.scala.model.PawnType.BLACK
+import main.scala.model.PawnType.BLACK_PROMOTED
+import main.scala.model.PawnType.EMPTY
+import main.scala.model.PawnType.PawnType
+import main.scala.model.PawnType.WHITE
+import main.scala.model.PawnType.WHITE_PROMOTED
 
 class Board(var state: Array[Array[PawnType]]) {
+  type PlayerType = PlayerType.PlayerType;
 
   import Board._;
 
-  val blackCount = state.foldLeft(0)((l, r) => l + r.count(isBlack(_)));
-  val whiteCount = state.foldLeft(0)((l, r) => l + r.count(isWhite(_)));
+  val blackCount = state.foldLeft(0)((l, r) => l + r.count(_.isBlack));
+  val whiteCount = state.foldLeft(0)((l, r) => l + r.count(_.isWhite));
 
   private var blackLeft = blackCount;
   private var whiteLeft = whiteCount;
-  private var currentPlayer = Player.WHITE;
+  private var currentPlayer = PlayerType.WHITE;
 
   private var availBeat = false;
   private var actionArray: ActionArray = null;
@@ -38,7 +42,7 @@ class Board(var state: Array[Array[PawnType]]) {
     case _ => return state(0).length;
   }
 
-  def getCurrentPlayer(): Player.Player = {
+  def getCurrentPlayer(): PlayerType = {
     return currentPlayer
   }
 
@@ -49,11 +53,11 @@ class Board(var state: Array[Array[PawnType]]) {
   def getAllMoves(): Action = {
     return allMoves;
   }
-  
+
   def getPawn(row: Int, col: Int): PawnType = {
     return state(row)(col);
   }
-  
+
   def getPawn(pos: Position): PawnType = {
     return getPawn(pos.row, pos.col);
   }
@@ -80,13 +84,13 @@ class Board(var state: Array[Array[PawnType]]) {
     }
 
     togglePlayer();
-    
-    if(update){
+
+    if (update) {
       updateMoves();
     }
   }
-  
-  def undoMove(){
+
+  def undoMove() {
     undoMove(true);
   }
 
@@ -114,20 +118,25 @@ class Board(var state: Array[Array[PawnType]]) {
 
     for (row <- 0 until getRowsCount()) {
       for (col <- 0 until getColsCount()) {
-        if ((isWhite(row, col) && currentPlayer == Player.WHITE) ||
-          (isBlack(row, col) && currentPlayer == Player.BLACK)) {
+        val pawn = state(row)(col);
+        if (pawn.isWhite && currentPlayer == PlayerType.WHITE ||
+          (pawn.isBlack && currentPlayer == PlayerType.BLACK)) {
           checkPawn(row, col);
         }
       }
     }
   }
-  
+
   def getBlackLeft(): Int = {
     return blackLeft;
   }
 
   def getWhiteLeft(): Int = {
     return whiteLeft;
+  }
+
+  def isGameEnd(): Boolean = {
+    return getBlackLeft() == 0 || getWhiteLeft() == 0 || getAllMoves()._1.isEmpty;
   }
 
   override def toString(): String = {
@@ -141,32 +150,33 @@ class Board(var state: Array[Array[PawnType]]) {
     }
     return builder.toString();
   }
-  
+
   override def equals(a: Any): Boolean = a match {
     case that: Board => that.state.deep == state.deep;
-    case _ => false;
+    case _           => false;
   }
-  
-  def reset(){
-    while(previous.nonEmpty){
+
+  def reset() {
+    while (previous.nonEmpty) {
       undoMove(false);
     }
+    updateMoves();
   }
 
   private def changeState(pow: Position, pawn: PawnType) {
     val tmp = state(pow.row)(pow.col);
     state(pow.row)(pow.col) = pawn;
-    
-    if(pawn == EMPTY){
-      if(isWhite(tmp)){
+
+    if (pawn == EMPTY) {
+      if (tmp.isWhite) {
         whiteLeft -= 1;
-      }else{
+      } else {
         blackLeft -= 1;
       }
-    }else{
-      if(isWhite(pawn)){
+    } else {
+      if (pawn.isWhite) {
         whiteLeft += 1;
-      }else{
+      } else {
         blackLeft += 1;
       }
     }
@@ -205,8 +215,8 @@ class Board(var state: Array[Array[PawnType]]) {
 
   private def checkPawn(row: Int, col: Int) {
     val steps = getStepsCount(row, col);
-    val up = currentPlayer == Player.WHITE;
-    val pr = isPromoted(row, col);
+    val up = currentPlayer == PlayerType.WHITE;
+    val pr = state(row)(col).isPromoted;
     var beat: Beat = null;
 
     var upw = (x: Boolean, y: Boolean) => x || y; // if current pawn is white or promoted allow him move upward
@@ -308,50 +318,18 @@ class Board(var state: Array[Array[PawnType]]) {
   }
 
   private def togglePlayer() {
-    currentPlayer match {
-      case Player.BLACK => currentPlayer = Player.WHITE;
-      case Player.WHITE => currentPlayer = Player.BLACK;
-    }
+    currentPlayer = PlayerType.toggle(currentPlayer);
   }
 
-  private def getStepsCount(row: Int, col: Int): Int = isPromoted(row, col) match {
+  private def getStepsCount(row: Int, col: Int): Int = state(row)(col).isPromoted match {
     case true  => Math.max(getRowsCount(), getColsCount()) - 1;
     case false => 1;
   }
 
   private def isOpposite(row: Int, col: Int): Boolean = {
-    return isWhite(row, col) && currentPlayer == Player.BLACK ||
-      isBlack(row, col) && currentPlayer == Player.WHITE;
-  }
-
-  private def isPromoted(row: Int, col: Int): Boolean = state(row)(col) match {
-    case WHITE_PROMOTED => true;
-    case BLACK_PROMOTED => true;
-    case _              => false;
-  }
-
-  private def isBlack(pawn: PawnType): Boolean = pawn match {
-    case BLACK          => true;
-    case BLACK_PROMOTED => true;
-    case _              => false;
-  }
-
-  private def isWhite(pawn: PawnType): Boolean = pawn match {
-    case WHITE          => true;
-    case WHITE_PROMOTED => true;
-    case _              => false;
-  }
-
-  private def isWhite(row: Int, col: Int): Boolean = state(row)(col) match {
-    case WHITE          => true;
-    case WHITE_PROMOTED => true;
-    case _              => false;
-  }
-
-  private def isBlack(row: Int, col: Int): Boolean = state(row)(col) match {
-    case BLACK          => true;
-    case BLACK_PROMOTED => true;
-    case _              => false;
+    val pawn = state(row)(col);
+    return pawn.isWhite && currentPlayer == PlayerType.BLACK ||
+      pawn.isBlack && currentPlayer == PlayerType.WHITE;
   }
 }
 
@@ -368,7 +346,7 @@ object Board {
   def apply(): Board = {
     return Board(DEFAULT_ROWS, DEFAULT_COLS, DEFAULT_PAWN_ROWS);
   }
-  
+
   def apply(rows: Int, cols: Int, pawnRows: Int): Board = {
     return new Board(createBoardArray(rows, cols, pawnRows));
   }
@@ -379,7 +357,7 @@ object Board {
       for (y <- from until to) {
         for (x <- 0 until cols) {
           if ((x + y) % 2 == 1) {
-            board(y)(x) = null;
+            board(y)(x) = tp;
           }
         }
       }
@@ -387,6 +365,6 @@ object Board {
     fill(0, pawnRows, WHITE);
     fill(rows - pawnRows, rows, BLACK);
 
-    return null;
+    return board;
   }
 }
