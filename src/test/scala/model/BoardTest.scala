@@ -66,40 +66,53 @@ class BoardTest extends FunSuite with BeforeAndAfterEach {
   }
 
   test("makeMoveBeating") {
+    var player = PlayerType.BLACK;
     var blackProm = Position(5, 2);
     var whitePawn = Position(3, 4);
-    var beat1 = (Move(blackProm, Position(whitePawn.row - 1, whitePawn.col + 1)), whitePawn);
-    var beat2 = (Move(blackProm, Position(whitePawn.row - 2, whitePawn.col + 2)), whitePawn);
-    var beat3 = (Move(blackProm, Position(whitePawn.row - 3, whitePawn.col + 3)), whitePawn);
+    var pawns = List((blackProm, BLACK_PROMOTED), (whitePawn, WHITE));
+    var beat1 = (Move(blackProm, Position(whitePawn.row - 1, whitePawn.col + 1)), whitePawn, WHITE);
+    var beat2 = (Move(blackProm, Position(whitePawn.row - 2, whitePawn.col + 2)), whitePawn, WHITE);
+    var beat3 = (Move(blackProm, Position(whitePawn.row - 3, whitePawn.col + 3)), whitePawn, WHITE);
+    var beats = List(beat1, beat2, beat3);
 
-    var state = Array.fill(Board.DEFAULT_ROWS, Board.DEFAULT_COLS)(EMPTY);
-    state(blackProm.row)(blackProm.col) = BLACK_PROMOTED;
-    state(whitePawn.row)(whitePawn.col) = WHITE;
+    testBeats(player, pawns, beats);
 
-    var board = Board(PlayerType.BLACK, state);
-    var moves = board.getAllMoves();
-
-    assert(moves._1.length == 3);
-    assert(moves._1.contains(beat1._1));
-    assert(moves._1.contains(beat2._1));
-    assert(moves._1.contains(beat3._1));
-    assert(moves._2.contains((beat1._2, WHITE)));
-    assert(moves._2.contains((beat2._2, WHITE)));
-    assert(moves._2.contains((beat3._2, WHITE)));
-    
     var blackPawn = Position(2, 3);
     whitePawn = Position(3, 4);
-    beat1 = (Move(whitePawn, Position(blackPawn.row - 1, blackPawn.col - 1)), blackPawn);
-    state = Array.fill(Board.DEFAULT_ROWS, Board.DEFAULT_COLS)(EMPTY);
-    state(blackPawn.row)(blackPawn.col) = BLACK;
-    state(whitePawn.row)(whitePawn.col) = WHITE;
-    
-    board = Board(PlayerType.WHITE, state);
-    moves = board.getAllMoves();
-    
-    assert(moves._1.length == 1);
-    assert(moves._1.contains(beat1._1));
-    assert(moves._2.contains((beat1._2, BLACK)));
+    beat1 = (Move(whitePawn, Position(blackPawn.row - 1, blackPawn.col - 1)), blackPawn, BLACK);
+
+    player = PlayerType.WHITE;
+    pawns = List((blackPawn, BLACK), (whitePawn, WHITE));
+    beats = List(beat1);
+    testBeats(player, pawns, beats);
+
+    player = PlayerType.WHITE;
+    blackPawn = Position(4, 3);
+    whitePawn = Position(5, 2);
+    var whiteProm = Position(6, 5);
+    pawns = List((blackPawn, BLACK), (whitePawn, WHITE), (whiteProm, WHITE_PROMOTED));
+    var beatWhite = (Move(whitePawn, Position(blackPawn.row - 1, blackPawn.col + 1)), blackPawn, BLACK);
+    var beatProm1 = (Move(whiteProm, Position(blackPawn.row - 1, blackPawn.col - 1)), blackPawn, BLACK);
+    var beatProm2 = (Move(whiteProm, Position(blackPawn.row - 2, blackPawn.col - 2)), blackPawn, BLACK);
+    var beatProm3 = (Move(whiteProm, Position(blackPawn.row - 3, blackPawn.col - 3)), blackPawn, BLACK);
+    beats = List(beatWhite, beatProm1, beatProm2, beatProm3);
+
+    testBeats(player, pawns, beats);
+  }
+
+  def testBeats(current: PlayerType, pawns: List[(Position, PawnType)],
+                beats: List[(Move, Position, PawnType)]) {
+    val state = Array.fill(Board.DEFAULT_ROWS, Board.DEFAULT_COLS)(EMPTY);
+    pawns.foreach { pawn => state(pawn._1.row)(pawn._1.col) = pawn._2; }
+    var board = Board(current, state);
+    var moves = board.getAllMoves();
+
+    assert(moves._1.length == beats.length);
+
+    for (beat <- beats) {
+      assert(moves._1.contains(beat._1));
+      assert(moves._2.contains((beat._2, beat._3)));
+    }
   }
 
 }
