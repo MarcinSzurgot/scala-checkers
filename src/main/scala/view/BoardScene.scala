@@ -111,5 +111,6 @@ class BoardScene extends Scene
 
   def clearPawn(pos: Position): Unit ={
     clearAllPawns(board(pos.col)(pos.row))
+    clearSelected()
   }
 }

@@ -52,6 +52,7 @@ class Player(_board: Board, _player: PlayerType, _game: Game, _boardScene : Boar
 
       return true
     }
+    _turnContinue = false;
     return false
   }
 }
