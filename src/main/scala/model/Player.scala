@@ -1,13 +1,13 @@
 package main.scala.model
 
 import main.scala.logic.Game
+import main.scala.model.Board.PlayerType
 import main.scala.view.BoardScene
 
-import scalafx.geometry.Point2D
-
-class Player(_board: Board, _player: Int, _game: Game, _boardScene : BoardScene) extends PlayerAbstract {
+class Player(_board: Board, _player: PlayerType, _game: Game, _boardScene : BoardScene) extends PlayerAbstract {
 
   private var selectedPawn = new Position(-1,-1)
+  var _turnContinue = false;
   def player = _player
 
   override def makeMove(x: Int, y: Int) {
@@ -24,23 +24,34 @@ class Player(_board: Board, _player: Int, _game: Game, _boardScene : BoardScene)
           if(e.equals(move)) {
           _boardScene.clearSelected()
           _board.makeMove(move)
-          _boardScene.updatePosition(move)
+          _boardScene.updatePosition(move, _board.getPawn(x,y))
           if (moves._2(i) != null) {
             _boardScene.clearPawn(moves._2(i)._1)
           }
-          selectedPawn = new Position(-1,-1)
+          if (!checkAndSignalEndTurn(move.end)) {
+            selectedPawn = new Position(-1,-1)
+          }
           return
         }
           i += 1
       }
-      if(_board.getMoves(selectedPawn.row,selectedPawn.col)._1.contains(move)){
-
-      }
     }
-    if(_board.getPawn(x,y) != PawnType.EMPTY && _board.getMoves(x,y)._1.nonEmpty){
+    if(!_turnContinue && _board.getPawn(x,y) != PawnType.EMPTY && _board.getMoves(x,y)._1.nonEmpty){
       _boardScene.clearSelected()
       selectedPawn = new Position(x,y)
       _boardScene.markSelectedFields(_board.getMoves(x,y))
     }
+  }
+
+  def checkAndSignalEndTurn(pawnPos: Position): Boolean = {
+    val moves =_board.getMoves(pawnPos.row, pawnPos.col);
+    if(moves._1.nonEmpty) {
+      _turnContinue = true;
+      selectedPawn = pawnPos
+      _boardScene.markSelectedFields(_board.getMoves(pawnPos.row, pawnPos.col))
+
+      return true
+    }
+    return false
   }
 }

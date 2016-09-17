@@ -9,12 +9,11 @@ import main.scala.model.Board
 class Game(_boardScene: BoardScene) {
   private var _board = Board();
   private var _players: List[PlayerAbstract] = List()
-  private var _currentPlayerIndex = 1
   private var _playersCount = 0
 
   def nextTurn(): Unit ={
-    _currentPlayerIndex += 1
-    _players(_currentPlayerIndex%_playersCount).makeMove(-1,-1)
+    checkIfGameEnd()
+    _players(getCurrentPlayerIndex()).makeMove(-1,-1)
   }
 
   def initGame(
@@ -26,14 +25,25 @@ class Game(_boardScene: BoardScene) {
     _board = Board();
     val playerListBuilder = ListBuffer[Player]()
     _playersCount = playersCount
-    for( a <- 1 until _playersCount+1){
-      playerListBuilder += new Player(_board, a, this, _boardScene)
-    }
+    playerListBuilder += new Player(_board, PlayerType.WHITE, this, _boardScene)
+    playerListBuilder += new Player(_board, PlayerType.BLACK, this, _boardScene)
     _players = playerListBuilder.toList
     _board
   }
 
   def takeAction(x:Int, y:Int) : Unit ={
-    _players(_currentPlayerIndex%_playersCount).makeMove(x,y)
+    _players(getCurrentPlayerIndex()).makeMove(x,y)
+  }
+
+  def getCurrentPlayerIndex(): Int = {
+    if(_board.getCurrentPlayer() == PlayerType.WHITE) {
+      return 0;
+    }
+    return 1;
+  }
+
+  def checkIfGameEnd(): Unit =
+  {
+
   }
 }

@@ -42,10 +42,10 @@ class BoardScene extends Scene
     }
   }
 
-  def updatePosition(move: Move): Unit = {
-    clearAllPawns(board(move.end.col)(move.end.row))
-    board(move.end.col)(move.end.row).styleClass += getStartingStyleClass(board(move.begin.col)(move.begin.row))
+  def updatePosition(move: Move, pawnType: PawnType): Unit = {
+    board(move.end.col)(move.end.row).styleClass += convertPawnTypeToCssClass(pawnType)
     clearAllPawns(board(move.begin.col)(move.begin.row))
+    clearSelected()
   }
 
   def clearSelected(): Unit = {
