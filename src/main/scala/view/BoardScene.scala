@@ -11,7 +11,7 @@ import main.scala.model.{Move, PawnType, Position}
 import main.scala.model.PawnType.PawnType
 
 
-class BoardScene extends Scene
+class BoardScene(_boardStage: BoardStage) extends Scene
 {
   final val BOARD_LENGTH = 8
   final val START_POS = 1
@@ -112,5 +112,10 @@ class BoardScene extends Scene
   def clearPawn(pos: Position): Unit ={
     clearAllPawns(board(pos.col)(pos.row))
     clearSelected()
+  }
+
+  def close(): Unit =
+  {
+    _boardStage.close()
   }
 }

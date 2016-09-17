@@ -6,6 +6,9 @@ import main.scala.view.BoardScene
 import scala.collection.mutable.ListBuffer
 import main.scala.model.Board
 
+import scalafx.scene.control.Alert
+import scalafx.scene.control.Alert.AlertType
+
 class Game(_boardScene: BoardScene) {
   private var _board = Board();
   private var _players: List[PlayerAbstract] = List()
@@ -44,6 +47,16 @@ class Game(_boardScene: BoardScene) {
 
   def checkIfGameEnd(): Unit =
   {
-
+    if (_board.isGameEnd()) {
+      var message = "";
+      if (_board.currentPlayer == PlayerType.BLACK) {
+        message = "White Player Won"
+      }
+      else if (_board.currentPlayer == PlayerType.WHITE) {
+        message = "Black Player Won"
+      }
+      new Alert(AlertType.Information, message).showAndWait();
+      _boardScene.close()
+    }
   }
 }

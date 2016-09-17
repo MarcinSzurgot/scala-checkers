@@ -30,6 +30,7 @@ class Player(_board: Board, _player: PlayerType, _game: Game, _boardScene : Boar
           }
           if (!checkAndSignalEndTurn(move.end)) {
             selectedPawn = new Position(-1,-1)
+            _game.nextTurn()
           }
           return
         }

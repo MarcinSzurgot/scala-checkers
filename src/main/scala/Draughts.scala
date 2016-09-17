@@ -1,4 +1,4 @@
-import main.scala.view.BoardScene
+import main.scala.view.{BoardScene, BoardStage}
 
 import scalafx.application.{JFXApp, Platform}
 import scalafx.geometry.{Insets, Pos}
@@ -32,15 +32,7 @@ object Draughts extends JFXApp {
           children = Seq(
             new Button("Start") {
               onAction = handle {
-                val boardStage = new Stage {
-                  title.value = "Board"
-                  width = 700
-                  height = 700
-                  minWidth = 100
-                  scene = new BoardScene {
-                    stylesheets = List(getClass.getResource("styles.css").toExternalForm)
-                  }
-                }
+                val boardStage = new BoardStage(List(getClass.getResource("styles.css").toExternalForm))
                 boardStage.show()
               }
             },
