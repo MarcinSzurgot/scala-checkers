@@ -197,10 +197,15 @@ class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[Paw
     }
 
     previous.push((move, beat, checkPromotion(e)));
-    togglePlayer();
-
-    if (update) {
+    
+    if(update){
+      val beforeBeat = availBeat;
       updateMoves();
+      
+      if(!(availBeat && beforeBeat)){
+    	  togglePlayer();        
+    	  updateMoves();
+      }      
     }
   }
 
