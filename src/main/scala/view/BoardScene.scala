@@ -2,7 +2,7 @@ package main.scala.view
 
 import scalafx.scene.layout._
 import scalafx.Includes._
-import scalafx.geometry.{HPos, Point2D, Pos, VPos}
+import scalafx.geometry._
 import scalafx.scene.Scene
 import scalafx.scene.input.MouseEvent
 import main.scala.logic.Game
@@ -29,6 +29,7 @@ class BoardScene(_boardStage: BoardStage) extends Scene
   content =new VBox() {
     vgrow = Priority.Always
     hgrow = Priority.Always
+    margin = Insets(0,0,0,0)
     children = Seq(
       playerLabel,
       new GridPane {
