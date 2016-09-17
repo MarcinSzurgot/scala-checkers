@@ -104,7 +104,8 @@ class BoardScene extends Scene
   }
 
   def markSelectedFields(moves : Action): Unit ={
-    board(moves._1.head.begin.col)(moves._1.head.begin.row).styleClass += "selected"
+//    board(moves._1.head.begin.col)(moves._1.head.begin.row).styleClass += "selected"
+    println(moves._1.size + " " +moves._2.size)
     moves._1.foreach{e => board(e.end.col)(e.end.row).styleClass += "selected"}
     moves._2.foreach{e => if(e != null) board(e._1.col)(e._1.row).styleClass += "danger"}
   }
