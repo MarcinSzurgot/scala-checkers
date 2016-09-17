@@ -2,13 +2,15 @@ package main.scala.view
 
 import scalafx.scene.layout._
 import scalafx.Includes._
-import scalafx.geometry.{HPos, Point2D, VPos}
+import scalafx.geometry.{HPos, Point2D, Pos, VPos}
 import scalafx.scene.Scene
 import scalafx.scene.input.MouseEvent
 import main.scala.logic.Game
 import main.scala.model.Board.Action
 import main.scala.model.{Move, PawnType, Position}
 import main.scala.model.PawnType.PawnType
+
+import scalafx.scene.control.{Button, Label}
 
 
 class BoardScene(_boardStage: BoardStage) extends Scene
@@ -18,28 +20,39 @@ class BoardScene(_boardStage: BoardStage) extends Scene
 
   var board = Array.ofDim[StackPane](BOARD_LENGTH, BOARD_LENGTH)
   val game = new Game(this)
-
-  content = new GridPane {
-    columnConstraints += new ColumnConstraints(60, Region.USE_COMPUTED_SIZE, Double.PositiveInfinity, Priority.Always, HPos.Center, true).delegate
-    rowConstraints += new RowConstraints(60, Region.USE_COMPUTED_SIZE, Double.PositiveInfinity, Priority.Always, VPos.Center, true).delegate
-    var tempBoard = game.initGame(8,8,3,2)
-    for (i <- START_POS to BOARD_LENGTH) {
-      columnConstraints += new ColumnConstraints(60, Region.USE_COMPUTED_SIZE, Double.PositiveInfinity, Priority.Always, HPos.Center, true).delegate
-      rowConstraints += new RowConstraints(60, Region.USE_COMPUTED_SIZE, Double.PositiveInfinity, Priority.Always, VPos.Center, true).delegate
-      for (a <- START_POS to BOARD_LENGTH) {
-        val boardPiece = new StackPane {
-          if (1 == (i + a) % 2) styleClass += "blackSquare" else styleClass += "whiteSquare"
-          if (convertPawnTypeToCssClass(tempBoard.getPawn(a-1,i-1)) != "None") {
-            styleClass += convertPawnTypeToCssClass(tempBoard.getPawn(a-1,i-1))
-          }
-          onMouseClicked = (me: MouseEvent) => {
-            game.takeAction(a-1,i-1)
+  var tempBoard = game.initGame(8,8,3,2)
+  var playerLabel = new Label(tempBoard.getCurrentPlayer().toString) {
+    id = "playerName"
+    alignment = Pos.Center
+    maxWidth = Double.MaxValue
+  }
+  content =new VBox() {
+    vgrow = Priority.Always
+    hgrow = Priority.Always
+    children = Seq(
+      playerLabel,
+      new GridPane {
+        columnConstraints += new ColumnConstraints(60, Region.USE_COMPUTED_SIZE, Double.PositiveInfinity, Priority.Always, HPos.Center, true).delegate
+        rowConstraints += new RowConstraints(60, Region.USE_COMPUTED_SIZE, Double.PositiveInfinity, Priority.Always, VPos.Center, true).delegate
+        for (i <- START_POS to BOARD_LENGTH) {
+          columnConstraints += new ColumnConstraints(60, Region.USE_COMPUTED_SIZE, Double.PositiveInfinity, Priority.Always, HPos.Center, true).delegate
+          rowConstraints += new RowConstraints(60, Region.USE_COMPUTED_SIZE, Double.PositiveInfinity, Priority.Always, VPos.Center, true).delegate
+          for (a <- START_POS to BOARD_LENGTH) {
+            val boardPiece = new StackPane {
+              if (1 == (i + a) % 2) styleClass += "blackSquare" else styleClass += "whiteSquare"
+              if (convertPawnTypeToCssClass(tempBoard.getPawn(a-1,i-1)) != "None") {
+                styleClass += convertPawnTypeToCssClass(tempBoard.getPawn(a-1,i-1))
+              }
+              onMouseClicked = (me: MouseEvent) => {
+                game.takeAction(a-1,i-1)
+              }
+            }
+            board(i-1)(a-1) = boardPiece
+            add(boardPiece.delegate, i, a)
           }
         }
-        board(i-1)(a-1) = boardPiece
-        add(boardPiece.delegate, i, a)
       }
-    }
+    )
   }
 
   def updatePosition(move: Move, pawnType: PawnType): Unit = {
@@ -117,5 +130,10 @@ class BoardScene(_boardStage: BoardStage) extends Scene
   def close(): Unit =
   {
     _boardStage.close()
+  }
+
+  def setCurrentPlayer(playerName: String): Unit =
+  {
+    playerLabel.text = playerName
   }
 }

@@ -16,6 +16,7 @@ class Game(_boardScene: BoardScene) {
 
   def nextTurn(): Unit ={
     checkIfGameEnd()
+    _boardScene.setCurrentPlayer(_board.currentPlayer.toString)
     _players(getCurrentPlayerIndex()).makeMove(-1,-1)
   }
 
