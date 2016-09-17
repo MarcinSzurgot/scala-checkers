@@ -241,16 +241,16 @@ class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[Paw
       var s = 1;
       while(s <= steps) {
         var res = addMove(row, col, f._1(row, s), f._2(col, s), beat, f._3(up, pr));
-        if(beat == null && res._1 != null){
-          beat = res._1;
+        if(beat == null && res != null){
+          beat = res;
           s += 1;
         }
-        s = if(res._2) s + 1 else steps + 1; 
+        s += 1;
       }
     }
   }
 
-  private def addMove(row: Int, col: Int, nrow: Int, ncol: Int, beat: Beat, up: Boolean): (Beat, Boolean) = {
+  private def addMove(row: Int, col: Int, nrow: Int, ncol: Int, beat: Beat, up: Boolean): Beat = {
     val rowc = getRowsCount();
     val colc = getColsCount();
     var pos: List[Int] = null;
@@ -262,7 +262,7 @@ class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[Paw
         } else if(!availBeat){
           pos = List(row, col, nrow, ncol);
         }else{
-          return (null, false);
+          return null;
         }
       } else if (isOpposite(nrow, ncol) && beat == null) {
         val nnrow = if(nrow > row) nrow + 1 else nrow - 1;
@@ -271,14 +271,14 @@ class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[Paw
           nncol < colc && state(nnrow)(nncol) == EMPTY) {
           pos = List(row, col, nrow, ncol, nnrow, nncol);
         } else {
-          return (null, false);
+          return null;
         }
       } else {
-        return (null, false);
+        return null;
       }
-      return (addMove(pos), true);
+      return addMove(pos);
     } else {
-      return (null, false);
+      return null;
     }
   }
 
