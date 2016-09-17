@@ -7,7 +7,7 @@ import scalafx.scene.Scene
 import scalafx.scene.input.MouseEvent
 import main.scala.logic.Game
 import main.scala.model.Board.Action
-import main.scala.model.{Move, PawnType}
+import main.scala.model.{Move, PawnType, Position}
 import main.scala.model.PawnType.PawnType
 
 
@@ -49,7 +49,7 @@ class BoardScene extends Scene
   }
 
   def clearSelected(): Unit = {
-    board.foreach{ x => x.foreach { x => x.styleClass -= "selected" } }
+    board.foreach{ x => x.foreach { x => x.styleClass -= "selected"; x.styleClass -= "danger"} }
   }
   def clearAllPawns(stackPane: StackPane): Unit = {
     stackPane.styleClass -= "whitePawn"
@@ -104,9 +104,12 @@ class BoardScene extends Scene
   }
 
   def markSelectedFields(moves : Action): Unit ={
-//    board(moves._1.head.begin.col)(moves._1.head.begin.row).styleClass += "selected"
-    println(moves._1.size + " " +moves._2.size)
+    board(moves._1.head.begin.col)(moves._1.head.begin.row).styleClass += "selected"
     moves._1.foreach{e => board(e.end.col)(e.end.row).styleClass += "selected"}
     moves._2.foreach{e => if(e != null) board(e._1.col)(e._1.row).styleClass += "danger"}
+  }
+
+  def clearPawn(pos: Position): Unit ={
+    clearAllPawns(board(pos.col)(pos.row))
   }
 }
