@@ -10,8 +10,7 @@ import main.scala.model.PawnType.PawnType
 import main.scala.model.PawnType.WHITE
 import main.scala.model.PawnType.WHITE_PROMOTED
 
-class Board(var state: Array[Array[PawnType]]) {
-  type PlayerType = PlayerType.PlayerType;
+class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[PawnType]]) {
 
   import Board._;
 
@@ -20,7 +19,6 @@ class Board(var state: Array[Array[PawnType]]) {
 
   private var blackLeft = blackCount;
   private var whiteLeft = whiteCount;
-  private var currentPlayer = PlayerType.WHITE;
 
   private var availBeat = false;
   private var actionArray: ActionArray = null;
@@ -30,7 +28,11 @@ class Board(var state: Array[Array[PawnType]]) {
   updateMoves();
 
   def this(rows: Int, cols: Int, pawnRows: Int) {
-    this(Board.createBoardArray(cols, rows, pawnRows));
+    this(PlayerType.WHITE, Board.createBoardArray(cols, rows, pawnRows));
+  }
+  
+  def this(state: Array[Array[PawnType]]){
+    this(PlayerType.WHITE, state);
   }
 
   def getRowsCount(): Int = {
@@ -72,10 +74,7 @@ class Board(var state: Array[Array[PawnType]]) {
     if (!undo._3) {
       state(beg.row)(beg.col) = tmp;
     } else {
-      tmp match {
-        case WHITE_PROMOTED => state(beg.row)(beg.col) = WHITE;
-        case BLACK_PROMOTED => state(beg.row)(beg.col) = BLACK;
-      }
+      state(beg.row)(beg.col) = PawnType.depromote(tmp);
     }
 
     if (beat != null) {
@@ -128,7 +127,7 @@ class Board(var state: Array[Array[PawnType]]) {
   }
 
   def getBlackLeft(): Int = {
-    return blackLeft;
+		  return blackLeft;
   }
 
   def getWhiteLeft(): Int = {
@@ -161,6 +160,10 @@ class Board(var state: Array[Array[PawnType]]) {
       undoMove(false);
     }
     updateMoves();
+  }
+  
+  def setCurrentPlayer(player: PlayerType){
+    currentPlayer = player;
   }
 
   private def changeState(pow: Position, pawn: PawnType) {
@@ -203,10 +206,10 @@ class Board(var state: Array[Array[PawnType]]) {
 
   private def checkPromotion(pos: Position): Boolean = {
     if (state(pos.row)(pos.col) == WHITE && pos.row == getRowsCount() - 1) {
-      state(pos.row)(pos.col) = WHITE_PROMOTED;
+      state(pos.row)(pos.col) = PawnType.promote(WHITE);
       return true;
     } else if (state(pos.row)(pos.col) == BLACK && pos.row == 0) {
-      state(pos.row)(pos.col) = BLACK_PROMOTED;
+      state(pos.row)(pos.col) = PawnType.promote(BLACK);
       return true;
     } else {
       return false;
@@ -230,12 +233,14 @@ class Board(var state: Array[Array[PawnType]]) {
     funcs.foreach { f =>
       beat = null;
       var cont = true;
-      for (s <- 1 to steps) {
-        if (cont) {
-          var res = addMove(row, col, f._1(row, s), f._2(col, s), beat, f._3(up, pr));
+      var s = 1;
+      while(s <= steps) {
+        var res = addMove(row, col, f._1(row, s), f._2(col, s), beat, f._3(up, pr));
+        if(beat == null && res._1 != null){
           beat = res._1;
-          cont = res._2;
+          s += 1;
         }
+        s = if(res._2) s + 1 else steps + 1; 
       }
     }
   }
@@ -249,11 +254,14 @@ class Board(var state: Array[Array[PawnType]]) {
       if (state(nrow)(ncol) == EMPTY && up) {
         if (beat != null) {
           pos = List(row, col, beat._1.row, beat._1.col, nrow, ncol);
-        } else {
+        } else if(!availBeat){
           pos = List(row, col, nrow, ncol);
+        }else{
+          return (null, false);
         }
       } else if (isOpposite(nrow, ncol) && beat == null) {
-        val (nnrow, nncol) = (2 * nrow - row, 2 * ncol - col);
+        val nnrow = if(nrow > row) nrow + 1 else nrow - 1;
+        val nncol = if(ncol > col) ncol + 1 else ncol - 1;
         if (nnrow >= 0 && nnrow < rowc && nncol >= 0 &&
           nncol < colc && state(nnrow)(nncol) == EMPTY) {
           pos = List(row, col, nrow, ncol, nnrow, nncol);
@@ -274,25 +282,27 @@ class Board(var state: Array[Array[PawnType]]) {
     var move: Move = null;
 
     if (pos.length == 4) {
-      move = new Move(
-        new Position(pos(0), pos(1)),
-        new Position(pos(2), pos(3)));
+      move = Move(
+        Position(pos(0), pos(1)),
+        Position(pos(2), pos(3)));
       beat = null;
     } else {
       setBeat();
-      move = new Move(
-        new Position(pos(0), pos(1)),
-        new Position(pos(4), pos(5)));
-      beat = (new Position(pos(2), pos(3)), state(pos(2))(pos(3)));
+      move = Move(
+        Position(pos(0), pos(1)),
+        Position(pos(4), pos(5)));
+      beat = (Position(pos(2), pos(3)), state(pos(2))(pos(3)));
     }
 
     actionArray(pos(0))(pos(1))._1.append(move);
     actionArray(pos(0))(pos(1))._2.append(beat);
-
+    
     allMoves._1.append(move);
     allMoves._2.append(beat);
     return beat;
   }
+  
+  var counter = 0;
 
   private def setBeat() {
     if (!availBeat) {
@@ -302,18 +312,13 @@ class Board(var state: Array[Array[PawnType]]) {
   }
 
   private def clear() {
-    actionArray = Array.ofDim[Action](getRowsCount(), getColsCount());
-    actionArray.foreach { row =>
-      for (col <- 0 until row.length) {
-        row(col) = (ArrayBuffer[Move](), ArrayBuffer[Beat]());
-      }
-    };
+    actionArray = Array.fill(getRowsCount(), getColsCount())(
+        (ArrayBuffer[Move](), ArrayBuffer[Beat]()));
 
     allMoves = (ArrayBuffer[Move](), ArrayBuffer[Beat]());
     if (previous == null) {
       previous = new PreviousMoves();
     }
-
     availBeat = false;
   }
 
@@ -334,6 +339,7 @@ class Board(var state: Array[Array[PawnType]]) {
 }
 
 object Board {
+  type PlayerType = PlayerType.PlayerType;
   type Beat = (Position, PawnType);
   type Action = (ArrayBuffer[Move], ArrayBuffer[Beat]);
   type ActionArray = Array[Array[Action]];
@@ -348,7 +354,11 @@ object Board {
   }
 
   def apply(rows: Int, cols: Int, pawnRows: Int): Board = {
-    return new Board(createBoardArray(rows, cols, pawnRows));
+    return new Board(PlayerType.WHITE, createBoardArray(rows, cols, pawnRows));
+  }
+  
+  def apply(player: PlayerType, state: Array[Array[PawnType]]): Board = {
+    return new Board(player, state);
   }
 
   def createBoardArray(rows: Int, cols: Int, pawnRows: Int): Array[Array[PawnType]] = {

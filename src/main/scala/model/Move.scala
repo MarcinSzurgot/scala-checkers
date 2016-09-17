@@ -6,7 +6,7 @@ class Move(var begin: Position, var end: Position) {
   }
   
   override def toString(): String = {
-    return "Begin: " + begin + "\n" + "End: " + end;
+    return "{" + begin + " -> " + end + "}";
   }
 
   override def equals(a: Any): Boolean = a match {
