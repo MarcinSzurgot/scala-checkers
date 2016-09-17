@@ -6,8 +6,9 @@ import scalafx.geometry.{HPos, Point2D, VPos}
 import scalafx.scene.Scene
 import scalafx.scene.input.MouseEvent
 import main.scala.logic.Game
-import main.scala.model.PawnType
-import main.scala.model.PawnType
+import main.scala.model.Board.Action
+import main.scala.model.{Move, PawnType}
+import main.scala.model.PawnType.PawnType
 
 
 class BoardScene extends Scene
@@ -41,10 +42,10 @@ class BoardScene extends Scene
     }
   }
 
-  def updatePosition(startPoint: Point2D, endPoint: Point2D): Unit = {
-    clearAllPawns(board(endPoint.y.toInt)(endPoint.x.toInt))
-    board(endPoint.y.toInt)(endPoint.x.toInt).styleClass += getStartingStyleClass(board(startPoint.y.toInt)(startPoint.x.toInt))
-    clearAllPawns(board(startPoint.y.toInt)(startPoint.x.toInt))
+  def updatePosition(move: Move): Unit = {
+    clearAllPawns(board(move.end.col)(move.end.row))
+    board(move.end.col)(move.end.row).styleClass += getStartingStyleClass(board(move.begin.col)(move.begin.row))
+    clearAllPawns(board(move.begin.col)(move.begin.row))
   }
 
   def clearSelected(): Unit = {
@@ -102,7 +103,9 @@ class BoardScene extends Scene
     "None"
   }
 
-  def markSelectedField(moves : List[Point2D]): Unit ={
-    moves.foreach{e => board(e.y.toInt)(e.x.toInt).styleClass += "selected"}
+  def markSelectedFields(moves : Action): Unit ={
+    board(moves._1.head.begin.col)(moves._1.head.begin.row).styleClass += "selected"
+    moves._1.foreach{e => board(e.end.col)(e.end.row).styleClass += "selected"}
+    moves._2.foreach{e => if(e != null) board(e._1.col)(e._1.row).styleClass += "danger"}
   }
 }
