@@ -19,6 +19,15 @@ class CheckerAi(player: PlayerType.PlayerType, board: Board,  _game: Game, _boar
       _game.nextTurn()
     }
   }
+  
+  def makeMoveTest(){
+    val move = testMoves();
+    println("Before: " + board.getCurrentPlayer());
+    println(board);
+    println(board.makeMove(move) + ", " + move + ", " + player);
+    println("After: " + board.getCurrentPlayer());
+    println(board);
+  }
 
   def computePoints(): Int = {
     val white = if (player == PlayerType.WHITE)
