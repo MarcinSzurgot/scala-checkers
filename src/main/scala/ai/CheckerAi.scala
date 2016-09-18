@@ -6,6 +6,8 @@ import main.scala.model.PlayerType
 import main.scala.model.Board
 import main.scala.model.Move
 import main.scala.view.BoardScene
+import main.scala.model.PawnType
+import main.scala.model.PawnType.PawnType
 
 class CheckerAi(player: PlayerType.PlayerType, var board: Board,  _game: Game, _boardScene : BoardScene) extends PlayerAbstract {
   import CheckerAi._;
@@ -40,15 +42,13 @@ class CheckerAi(player: PlayerType.PlayerType, var board: Board,  _game: Game, _
     val moves = board.getAllMoves();
     var best = (Int.MinValue, 0);
     for(move <- 0 until moves._1.length){
-      if(board.makeMove(moves._1(move))){
-      	val points = testMoves(MAX_DEPTH - 1, false);
-      	board.undoMove();
-        if(points > best._1){
-          best = (points, move);
-        }
+      board.makeMove(moves._1(move));
+    	val points = testMoves(MAX_DEPTH - 1, false);
+    	board.undoMove();
+      if(points > best._1){
+        best = (points, move);
       }
     }
-    board.setCurrentPlayer(if(player == PlayerType.WHITE) PlayerType.BLACK else PlayerType.WHITE);
     return moves._1(best._2);
   }
 
@@ -58,11 +58,10 @@ class CheckerAi(player: PlayerType.PlayerType, var board: Board,  _game: Game, _
     	val moves = board.getAllMoves();
       var points = if (max) Int.MinValue else Int.MaxValue;
       for (move <- moves._1) {
-        if(board.makeMove(move)){
-          val test = testMoves(depth - 1, !max);
-          points = if (max) Math.max(points, test) else Math.min(points, test);
-          board.undoMove();
-        }
+        board.makeMove(move);
+        val test = testMoves(depth - 1, !max);
+        points = if (max) Math.max(points, test) else Math.min(points, test);
+        board.undoMove();
       }
       return points;
     } else {
