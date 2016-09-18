@@ -21,6 +21,7 @@ class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[Paw
   private var whiteLeft = whiteCount;
 
   private var availBeat = false;
+  private var lastBeatPos: Position = null;
   private var actionArray: ActionArray = null;
   private var allMoves: Action = null;
   private var previous: PreviousMoves = null;
@@ -122,14 +123,18 @@ class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[Paw
   def updateMoves() {
     clear();
 
-    for (row <- 0 until getRowsCount()) {
-      for (col <- 0 until getColsCount()) {
-        val pawn = state(row)(col);
-        if (pawn.isWhite && currentPlayer == PlayerType.WHITE ||
-          (pawn.isBlack && currentPlayer == PlayerType.BLACK)) {
-          checkPawn(row, col);
+    if(lastBeatPos == null){
+      for (row <- 0 until getRowsCount()) {
+        for (col <- 0 until getColsCount()) {
+          val pawn = state(row)(col);
+          if (pawn.isWhite && currentPlayer == PlayerType.WHITE ||
+            (pawn.isBlack && currentPlayer == PlayerType.BLACK)) {
+            checkPawn(row, col);
+          }
         }
       }
+    }else{
+      checkPawn(lastBeatPos.row, lastBeatPos.col);
     }
   }
 
@@ -200,19 +205,27 @@ class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[Paw
     state(e.row)(e.col) = tmp;
 
     if (beat != null) {
-      changeState(beat._1, EMPTY); // TODO Poprawić kontynuowanie tury dla bicia kaskadowego
+      changeState(beat._1, EMPTY);
     }
 
     previous.push((move, beat, checkPromotion(e)));
     
     if(update){
-      val beforeBeat = availBeat;
-      updateMoves();
-      
-      if(!(availBeat && beforeBeat)){
-    	  togglePlayer();        
-    	  updateMoves();
-      }      
+      if(availBeat){
+        val prevBeat = availBeat;
+        lastBeatPos = previous.top._1.end;
+        updateMoves();
+        
+        if(!(availBeat && prevBeat)){
+          lastBeatPos = null;
+          togglePlayer();
+          updateMoves();
+        }
+      }else{
+        lastBeatPos = null;
+        togglePlayer();
+        updateMoves();
+      }
     }
   }
 
@@ -288,38 +301,6 @@ class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[Paw
       return (null, false);
     }
   }
-
-//  private def addMove(row: Int, col: Int, nrow: Int, ncol: Int, beat: Beat, up: Boolean): (Beat, Boolean) = {
-//    val rowc = getRowsCount();
-//    val colc = getColsCount();
-//    var pos: List[Int] = null;
-//
-//    if (nrow >= 0 && nrow < rowc && ncol >= 0 && ncol < colc) {
-//      if (state(nrow)(ncol) == EMPTY && up) {
-//        if (beat != null) {
-//          pos = List(row, col, beat._1.row, beat._1.col, nrow, ncol);
-//        } else if(!availBeat){
-//          pos = List(row, col, nrow, ncol);
-//        }else{
-//          return (null, true);
-//        }
-//      } else if (isOpposite(nrow, ncol) && beat == null) {
-//        val nnrow = if(nrow > row) nrow + 1 else nrow - 1;
-//        val nncol = if(ncol > col) ncol + 1 else ncol - 1;
-//        if (nnrow >= 0 && nnrow < rowc && nncol >= 0 &&
-//          nncol < colc && state(nnrow)(nncol) == EMPTY) {
-//          pos = List(row, col, nrow, ncol, nnrow, nncol);
-//        } else {
-//          return (null, true);
-//        }
-//      } else {
-//        return (null, true);
-//      }
-//      return (addMove(pos), true);
-//    } else {
-//      return (null, false);
-//    }
-//  }
 
   private def addMove(pos: List[Int]): Beat = {
     var beat: Beat = null;
