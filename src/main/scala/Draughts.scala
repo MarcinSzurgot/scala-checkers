@@ -32,7 +32,7 @@ object Draughts extends JFXApp {
   }
   stage = new JFXApp.PrimaryStage {
     title.value = "Draughts"
-    width = 300
+    width = 320
     height = 530
     scene = new Scene {
       stylesheets = List(getClass.getResource("styles.css").toExternalForm)

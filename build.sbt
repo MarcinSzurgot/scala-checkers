@@ -24,6 +24,12 @@ offline := true
 
 parallelExecution in Test := false
 
+unmanagedJars in Compile += {
+  val ps = new sys.SystemProperties
+  val jh = ps("java.home")
+  Attributed.blank(file(jh) / "lib/ext/jfxrt.jar")
+}
+
 libraryDependencies ++= Seq(
 	"org.scalafx" %% "scalafx" % "8.0.92-R10",
 	"org.scalatest" %% "scalatest" % "2.2.4" % "test" withSources() withJavadoc()
