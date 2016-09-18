@@ -31,8 +31,8 @@ class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[Paw
   def this(rows: Int, cols: Int, pawnRows: Int) {
     this(PlayerType.WHITE, Board.createBoardArray(cols, rows, pawnRows));
   }
-  
-  def this(state: Array[Array[PawnType]]){
+
+  def this(state: Array[Array[PawnType]]) {
     this(PlayerType.WHITE, state);
   }
 
@@ -66,10 +66,10 @@ class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[Paw
   }
 
   def undoMove(update: Boolean) {
-    if(previous.isEmpty){
-      return;
+    if (previous.isEmpty) {
+      return ;
     }
-    
+
     val undo = previous.pop();
     val (beg, end) = (undo._1.begin, undo._1.end);
     val beat = undo._2;
@@ -87,12 +87,10 @@ class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[Paw
       changeState(beat._1, beat._2);
     }
 
-    if(previous.nonEmpty){
-      val prev = previous.top._2;
-      if(prev == null || (prev != null && beat != null && prev._2 != beat._2)){
-        togglePlayer();
-      }
-    }else{
+    if (beat != null) {
+      currentPlayer = if (beat._2.isWhite)
+        PlayerType.BLACK else PlayerType.WHITE;
+    } else {
       togglePlayer();
     }
 
@@ -127,7 +125,7 @@ class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[Paw
   def updateMoves() {
     clear();
 
-    if(lastBeatPos == null){
+    if (lastBeatPos == null) {
       for (row <- 0 until getRowsCount()) {
         for (col <- 0 until getColsCount()) {
           val pawn = state(row)(col);
@@ -137,13 +135,13 @@ class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[Paw
           }
         }
       }
-    }else{
+    } else {
       checkPawn(lastBeatPos.row, lastBeatPos.col);
     }
   }
 
   def getBlackLeft(): Int = {
-		  return blackLeft;
+    return blackLeft;
   }
 
   def getWhiteLeft(): Int = {
@@ -177,8 +175,8 @@ class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[Paw
     }
     updateMoves();
   }
-  
-  def setCurrentPlayer(player: PlayerType){
+
+  def setCurrentPlayer(player: PlayerType) {
     currentPlayer = player;
   }
 
@@ -213,19 +211,19 @@ class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[Paw
     }
 
     previous.push((move, beat, checkPromotion(e)));
-    
-    if(update){
-      if(availBeat){
+
+    if (update) {
+      if (availBeat) {
         val prevBeat = availBeat;
         lastBeatPos = previous.top._1.end;
         updateMoves();
-        
-        if(!(availBeat && prevBeat)){
+
+        if (!(availBeat && prevBeat)) {
           lastBeatPos = null;
           togglePlayer();
           updateMoves();
         }
-      }else{
+      } else {
         lastBeatPos = null;
         togglePlayer();
         updateMoves();
@@ -263,17 +261,17 @@ class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[Paw
       beat = null;
       var cont = true;
       var s = 1;
-      while(s <= steps) {
+      while (s <= steps) {
         var res = addMove(row, col, f._1(row, s), f._2(col, s), beat, f._3(up, pr));
-        if(beat == null && res._1 != null){
+        if (beat == null && res._1 != null) {
           beat = res._1;
           s += 1;
         }
-        s = if(res._2) s + 1 else steps + 1;
+        s = if (res._2) s + 1 else steps + 1;
       }
     }
   }
-  
+
   private def addMove(row: Int, col: Int, nrow: Int, ncol: Int, beat: Beat, up: Boolean): (Beat, Boolean) = {
     val rowc = getRowsCount();
     val colc = getColsCount();
@@ -283,14 +281,14 @@ class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[Paw
       if (state(nrow)(ncol) == EMPTY && up) {
         if (beat != null) {
           pos = List(row, col, beat._1.row, beat._1.col, nrow, ncol);
-        } else if(!availBeat){
+        } else if (!availBeat) {
           pos = List(row, col, nrow, ncol);
-        }else{
+        } else {
           return (null, true);
         }
       } else if (isOpposite(nrow, ncol) && beat == null) {
-        val nnrow = if(nrow > row) nrow + 1 else nrow - 1;
-        val nncol = if(ncol > col) ncol + 1 else ncol - 1;
+        val nnrow = if (nrow > row) nrow + 1 else nrow - 1;
+        val nncol = if (ncol > col) ncol + 1 else ncol - 1;
         if (nnrow >= 0 && nnrow < rowc && nncol >= 0 &&
           nncol < colc && state(nnrow)(nncol) == EMPTY) {
           pos = List(row, col, nrow, ncol, nnrow, nncol);
@@ -325,12 +323,12 @@ class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[Paw
 
     actionArray(pos(0))(pos(1))._1.append(move);
     actionArray(pos(0))(pos(1))._2.append(beat);
-    
+
     allMoves._1.append(move);
     allMoves._2.append(beat);
     return beat;
   }
-  
+
   var counter = 0;
 
   private def setBeat() {
@@ -342,7 +340,7 @@ class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[Paw
 
   private def clear() {
     actionArray = Array.fill(getRowsCount(), getColsCount())(
-        (ArrayBuffer[Move](), ArrayBuffer[Beat]()));
+      (ArrayBuffer[Move](), ArrayBuffer[Beat]()));
 
     allMoves = (ArrayBuffer[Move](), ArrayBuffer[Beat]());
     if (previous == null) {
@@ -385,7 +383,7 @@ object Board {
   def apply(rows: Int, cols: Int, pawnRows: Int): Board = {
     return new Board(PlayerType.WHITE, createBoardArray(rows, cols, pawnRows));
   }
-  
+
   def apply(player: PlayerType, state: Array[Array[PawnType]]): Board = {
     return new Board(player, state);
   }
