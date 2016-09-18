@@ -4,11 +4,9 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.Stack
 
 import main.scala.model.PawnType.BLACK
-import main.scala.model.PawnType.BLACK_PROMOTED
 import main.scala.model.PawnType.EMPTY
 import main.scala.model.PawnType.PawnType
 import main.scala.model.PawnType.WHITE
-import main.scala.model.PawnType.WHITE_PROMOTED
 
 class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[PawnType]]) {
 

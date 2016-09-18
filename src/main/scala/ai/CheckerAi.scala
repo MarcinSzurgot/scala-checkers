@@ -6,12 +6,9 @@ import main.scala.model.PlayerType
 import main.scala.model.Board
 import main.scala.model.Move
 import main.scala.view.BoardScene
-import main.scala.model.PawnType
-import main.scala.model.PawnType.PawnType
 
 class CheckerAi(player: PlayerType.PlayerType, var board: Board, var depth: Int,
                 _game: Game, _boardScene: BoardScene) extends PlayerAbstract {
-  import CheckerAi._;
 
   override def makeMove(row: Int, col: Int) {
     if (row == -1 && col == -1) {

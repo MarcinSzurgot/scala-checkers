@@ -10,7 +10,7 @@ import main.scala.model.Board.Action
 import main.scala.model.{Board, Move, PawnType, Position}
 import main.scala.model.PawnType.PawnType
 
-import scalafx.scene.control.{Button, Label}
+import scalafx.scene.control.Label
 
 
 class BoardScene(_boardStage: BoardStage, _playerNumber: Int, _level: Int) extends Scene

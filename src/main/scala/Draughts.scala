@@ -1,4 +1,4 @@
-import main.scala.view.{BoardScene, BoardStage}
+import main.scala.view.BoardStage
 
 import scalafx.application.{JFXApp, Platform}
 import scalafx.geometry.{Insets, Pos}
@@ -7,7 +7,6 @@ import scalafx.scene.control.{Button, ComboBox, Label}
 import scalafx.scene.layout.{BorderPane, HBox, Priority, VBox}
 import scalafx.Includes._
 import scalafx.collections.ObservableBuffer
-import scalafx.stage.Stage
 
 object Draughts extends JFXApp {
   val playerChoice = new ComboBox[String] {

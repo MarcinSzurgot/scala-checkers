@@ -1,7 +1,5 @@
 package main.scala.view
 
-import main.scala.view.BoardScene
-
 import scalafx.stage.Stage
 
 class BoardStage(_cssPath: List[String], playerChoice: String, _level: Int) extends Stage
