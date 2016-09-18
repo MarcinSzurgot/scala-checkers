@@ -204,13 +204,28 @@ class BoardTest extends FunSuite with BeforeAndAfterEach {
     var whitePawn5 = Position(5, 6);
     var whitePawn6 = Position(7, 6);
     var pawns = List((blackPawn1, BLACK),(blackPawn2, BLACK), (whitePawn1, WHITE),(whitePawn2, WHITE),(whitePawn3, WHITE),(whitePawn4, WHITE),(whitePawn5, WHITE),(whitePawn6, WHITE));
-    var beat1 = (Move(blackPawn1, Position(whitePawn1.row - 1, whitePawn1.col + 1)),whitePawn1,WHITE);
+    var beat1 = (Move(blackPawn1, Position(whitePawn1.row + 1, whitePawn1.col - 1)),whitePawn1,WHITE);
     var beat2 = (Move(blackPawn1, Position(whitePawn2.row + 1, whitePawn2.col + 1)),whitePawn2,WHITE);
     var beat3 = (Move(blackPawn2, Position(whitePawn5.row - 1, whitePawn5.col - 1)),whitePawn5,WHITE);
-
     var beats = List(beat1, beat2, beat3);
 
     testBeats(player, pawns, beats);
+  }
+
+  test("makeMultipleBeating"){
+    val modelForBeating = Array(
+      Array(EMPTY, WHITE, EMPTY, WHITE, EMPTY, WHITE, EMPTY, WHITE),
+      Array(EMPTY, EMPTY, WHITE, EMPTY, WHITE, EMPTY, WHITE, EMPTY),
+      Array(EMPTY, WHITE, EMPTY, WHITE, EMPTY, WHITE, EMPTY, WHITE),
+      Array(EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY),
+      Array(EMPTY, WHITE, EMPTY, EMPTY, EMPTY, WHITE, EMPTY, EMPTY),
+      Array(BLACK, EMPTY, BLACK, EMPTY, BLACK, EMPTY, BLACK, EMPTY),
+      Array(EMPTY, BLACK, EMPTY, BLACK, EMPTY, BLACK, EMPTY, BLACK),
+      Array(BLACK, EMPTY, BLACK, EMPTY, BLACK, EMPTY, BLACK, EMPTY));
+      var boardTest = Board(PlayerType.BLACK,modelForBeating);
+      boardTest.makeMove(Move(Position(5,0),Position(3,2)))
+      boardTest.makeMove(Move(Position(3,2),Position(0,1)))
+      assert(boardTest.getCurrentPlayer()==PlayerType.WHITE)
   }
 
 }
