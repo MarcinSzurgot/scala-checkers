@@ -7,7 +7,7 @@ import main.scala.model.Board
 import main.scala.model.Move
 import main.scala.view.BoardScene
 
-class CheckerAi(player: PlayerType.PlayerType, board: Board,  _game: Game, _boardScene : BoardScene) extends PlayerAbstract {
+class CheckerAi(player: PlayerType.PlayerType, var board: Board,  _game: Game, _boardScene : BoardScene) extends PlayerAbstract {
   import CheckerAi._;
 
   override def makeMove(row: Int, col: Int) {
@@ -22,11 +22,7 @@ class CheckerAi(player: PlayerType.PlayerType, board: Board,  _game: Game, _boar
   
   def makeMoveTest(){
     val move = testMoves();
-    println("Before: " + board.getCurrentPlayer());
-    println(board);
-    println(board.makeMove(move) + ", " + move + ", " + player);
-    println("After: " + board.getCurrentPlayer());
-    println(board);
+    board.makeMove(move);
   }
 
   def computePoints(): Int = {
@@ -42,15 +38,17 @@ class CheckerAi(player: PlayerType.PlayerType, board: Board,  _game: Game, _boar
   private def testMoves(): Move = {
     board.updateMoves();
     val moves = board.getAllMoves();
-    var best = (Int.MinValue, -1);
+    var best = (Int.MinValue, 0);
     for(move <- 0 until moves._1.length){
-      board.makeMove(moves._1(move));
-    	val points = testMoves(MAX_DEPTH - 1, false);
-    	board.undoMove();
-      if(points > best._1){
-        best = (points, move);
+      if(board.makeMove(moves._1(move))){
+      	val points = testMoves(MAX_DEPTH - 1, false);
+      	board.undoMove();
+        if(points > best._1){
+          best = (points, move);
+        }
       }
     }
+    board.setCurrentPlayer(if(player == PlayerType.WHITE) PlayerType.BLACK else PlayerType.WHITE);
     return moves._1(best._2);
   }
 
@@ -60,10 +58,11 @@ class CheckerAi(player: PlayerType.PlayerType, board: Board,  _game: Game, _boar
     	val moves = board.getAllMoves();
       var points = if (max) Int.MinValue else Int.MaxValue;
       for (move <- moves._1) {
-        board.makeMove(move);
-        points = if (max) Math.max(testMoves(depth - 1, !max), points)
-        else Math.min(testMoves(depth - 1, !max), points);
-        board.undoMove();
+        if(board.makeMove(move)){
+          val test = testMoves(depth - 1, !max);
+          points = if (max) Math.max(points, test) else Math.min(points, test);
+          board.undoMove();
+        }
       }
       return points;
     } else {

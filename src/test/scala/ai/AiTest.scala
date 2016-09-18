@@ -61,5 +61,6 @@ class AiTest extends FunSuite{
       cpu1.makeMoveTest();
       cpu2.makeMoveTest();
     }
+    println(board);
   }
 }

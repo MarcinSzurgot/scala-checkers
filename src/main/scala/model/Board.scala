@@ -64,6 +64,14 @@ class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[Paw
   def getPawn(pos: Position): PawnType = {
     return getPawn(pos.row, pos.col);
   }
+  
+  def getLastBeat(): Beat = {
+    if(previous.nonEmpty){
+      return previous.top._2;
+    }else{
+      return null;
+    }
+  }
 
   def undoMove(update: Boolean) {
     if (previous.isEmpty) {
@@ -112,6 +120,8 @@ class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[Paw
     if (beg != null) {
       val i = beg._1.indexOf(move);
       if (i == -1) {
+//        println("siema xD: " + move);
+//        println(toString());
         return false;
       } else {
         makeMoveUnchecked(move, beg._2(i), update);
@@ -328,8 +338,6 @@ class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[Paw
     allMoves._2.append(beat);
     return beat;
   }
-
-  var counter = 0;
 
   private def setBeat() {
     if (!availBeat) {
