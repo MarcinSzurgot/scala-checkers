@@ -16,7 +16,7 @@ class Game(_boardScene: BoardScene) {
   private var _playersCount = 0
 
   def nextTurn(): Unit ={
-    println("asasasasas" + getCurrentPlayerIndex() + " " + _board.currentPlayer.toString)
+    _board.updateMoves()
     checkIfGameEnd()
     _boardScene.setCurrentPlayer(_board.currentPlayer.toString)
     _players(getCurrentPlayerIndex()).makeMove(-1,-1)

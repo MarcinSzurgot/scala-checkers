@@ -16,8 +16,8 @@ class CheckerAi(player: PlayerType.PlayerType, var board: Board,  _game: Game, _
     if( row == -1 && col == -1) {
       val move = testMoves();
       board.makeMove(move);
-      _boardScene.clearSelected()
-      _boardScene.updatePosition(move, board.getPawn(move.end.row, move.end.col))
+//      _boardScene.clearSelected()
+      _boardScene.clearBoard(board)
       _game.nextTurn()
     }
   }
