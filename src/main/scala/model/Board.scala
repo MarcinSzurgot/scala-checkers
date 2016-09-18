@@ -66,6 +66,10 @@ class Board(var currentPlayer: PlayerType.PlayerType, var state: Array[Array[Paw
   }
 
   def undoMove(update: Boolean) {
+    if(previous.isEmpty){
+      return;
+    }
+    
     val undo = previous.pop();
     val (beg, end) = (undo._1.begin, undo._1.end);
     val beat = undo._2;
