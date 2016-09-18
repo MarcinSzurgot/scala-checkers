@@ -56,5 +56,8 @@ class AiTest extends FunSuite{
   }
   
   test("testMoves"){
+    var board = Board();
+    var cpu = CheckerAi(PlayerType.WHITE, board);
+    cpu.makeMove(0, 0);
   }
 }
