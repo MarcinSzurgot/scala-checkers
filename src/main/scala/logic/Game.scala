@@ -26,14 +26,15 @@ class Game(_boardScene: BoardScene) {
                 boardWidth: Int,
                 boardLength: Int,
                 pawnRows: Int,
-                playersCount: Int
+                playersCount: Int,
+                level: Int
               ) : Board = {
     _board = Board();
     val playerListBuilder = ListBuffer[PlayerAbstract]()
     _playersCount = playersCount
     println(_playersCount)
     playerListBuilder += new Player(_board, PlayerType.WHITE, this, _boardScene)
-    if(_playersCount == 1) playerListBuilder += CheckerAi(PlayerType.BLACK,_board, this, _boardScene)
+    if(_playersCount == 1) playerListBuilder += CheckerAi(PlayerType.BLACK,_board, level, this, _boardScene)
     else playerListBuilder += new Player(_board, PlayerType.BLACK, this, _boardScene)
     _players = playerListBuilder.toList
     _board
