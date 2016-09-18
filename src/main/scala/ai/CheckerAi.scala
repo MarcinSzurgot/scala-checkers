@@ -9,20 +9,21 @@ import main.scala.view.BoardScene
 import main.scala.model.PawnType
 import main.scala.model.PawnType.PawnType
 
-class CheckerAi(player: PlayerType.PlayerType, var board: Board,  _game: Game, _boardScene : BoardScene) extends PlayerAbstract {
+class CheckerAi(player: PlayerType.PlayerType, var board: Board, var depth: Int,
+                _game: Game, _boardScene: BoardScene) extends PlayerAbstract {
   import CheckerAi._;
 
   override def makeMove(row: Int, col: Int) {
-    if( row == -1 && col == -1) {
+    if (row == -1 && col == -1) {
       val move = testMoves();
       board.makeMove(move);
-//      _boardScene.clearSelected()
+      //      _boardScene.clearSelected()
       _boardScene.clearBoard(board)
       _game.nextTurn()
     }
   }
-  
-  def makeMoveTest(){
+
+  def makeMoveTest() {
     val move = testMoves();
     board.makeMove(move);
   }
@@ -41,11 +42,11 @@ class CheckerAi(player: PlayerType.PlayerType, var board: Board,  _game: Game, _
     board.updateMoves();
     val moves = board.getAllMoves();
     var best = (Int.MinValue, 0);
-    for(move <- 0 until moves._1.length){
+    for (move <- 0 until moves._1.length) {
       board.makeMove(moves._1(move));
-    	val points = testMoves(MAX_DEPTH - 1, false);
-    	board.undoMove();
-      if(points > best._1){
+      val points = testMoves(depth - 1, false);
+      board.undoMove();
+      if (points > best._1) {
         best = (points, move);
       }
     }
@@ -54,8 +55,8 @@ class CheckerAi(player: PlayerType.PlayerType, var board: Board,  _game: Game, _
 
   private def testMoves(depth: Int, max: Boolean): Int = {
     if (depth != 0) {
-    	board.updateMoves();
-    	val moves = board.getAllMoves();
+      board.updateMoves();
+      val moves = board.getAllMoves();
       var points = if (max) Int.MinValue else Int.MaxValue;
       for (move <- moves._1) {
         board.makeMove(move);
@@ -67,15 +68,20 @@ class CheckerAi(player: PlayerType.PlayerType, var board: Board,  _game: Game, _
     } else {
       return computePoints();
     }
-  } 
+  }
 }
 
 object CheckerAi {
-  val MAX_DEPTH = 5;
+  val DEFAULT_MAX_DEPTH = 5;
 
   type PlayerType = PlayerType.PlayerType;
 
-  def apply(player: PlayerType.PlayerType, board: Board,  _game: Game, _boardScene : BoardScene): CheckerAi = {
-    return new CheckerAi(player, board, _game, _boardScene);
+  def apply(player: PlayerType.PlayerType, board: Board, _game: Game, _boardScene: BoardScene): CheckerAi = {
+    return new CheckerAi(player, board, DEFAULT_MAX_DEPTH, _game, _boardScene);
+  }
+
+  def apply(player: PlayerType.PlayerType, board: Board, depth: Int,
+            _game: Game, _boardScene: BoardScene): CheckerAi = {
+    return new CheckerAi(player, board, depth, _game, _boardScene);
   }
 }

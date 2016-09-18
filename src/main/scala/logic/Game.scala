@@ -33,7 +33,7 @@ class Game(_boardScene: BoardScene) {
     _playersCount = playersCount
     println(_playersCount)
     playerListBuilder += new Player(_board, PlayerType.WHITE, this, _boardScene)
-    if(_playersCount == 1) playerListBuilder += new CheckerAi(PlayerType.BLACK,_board, this, _boardScene)
+    if(_playersCount == 1) playerListBuilder += CheckerAi(PlayerType.BLACK,_board, this, _boardScene)
     else playerListBuilder += new Player(_board, PlayerType.BLACK, this, _boardScene)
     _players = playerListBuilder.toList
     _board
