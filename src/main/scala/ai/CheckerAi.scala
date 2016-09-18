@@ -9,7 +9,7 @@ class CheckerAi(player: PlayerType.PlayerType, board: Board) extends PlayerAbstr
   import CheckerAi._;
 
   override def makeMove(row: Int, col: Int) {
-    board.makeMove(testMoves());
+    println(board.makeMove(testMoves()));
   }
 
   def computePoints(): Int = {
