@@ -89,3 +89,8 @@
     -fx-stroke-width: 1;
 }
 
+#level {
+    -fx-font: 20px Tahoma;
+    -fx-text-fill: white;
+}
+

@@ -74,6 +74,11 @@ object Draughts extends JFXApp {
           spacing = 15
           children = Seq(
             playerChoice,
+            new Label("Levels") {
+              id = "level"
+              alignment = Pos.Center
+              maxWidth = Double.MaxValue
+            },
             level
           )
           minHeight = 100
