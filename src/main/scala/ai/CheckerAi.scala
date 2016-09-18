@@ -11,11 +11,13 @@ class CheckerAi(player: PlayerType.PlayerType, board: Board,  _game: Game, _boar
   import CheckerAi._;
 
   override def makeMove(row: Int, col: Int) {
-    val move = testMoves();
-    board.makeMove(move);
-    _boardScene.clearSelected()
-    _boardScene.updatePosition(move, board.getPawn(move.begin.row, move.begin.col))
-    _game.nextTurn()
+    if( row == -1 && col == -1) {
+      val move = testMoves();
+      board.makeMove(move);
+      _boardScene.clearSelected()
+      _boardScene.updatePosition(move, board.getPawn(move.end.row, move.end.col))
+      _game.nextTurn()
+    }
   }
 
   def computePoints(): Int = {
