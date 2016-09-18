@@ -228,4 +228,64 @@ class BoardTest extends FunSuite with BeforeAndAfterEach {
       assert(boardTest.getCurrentPlayer()==PlayerType.WHITE)
   }
 
+  test("undoMove"){
+    var boardTest = Board(PlayerType.BLACK,modelState);
+    boardTest.makeMove(Move(Position(5,6),Position(4,7)))
+    assert(boardTest.getPawn(Position(5,6))==EMPTY)
+    assert(boardTest.getPawn(Position(4,7))==BLACK)
+    boardTest.undoMove()
+    assert(boardTest.getPawn(Position(5,6))==BLACK)
+    assert(boardTest.getPawn(Position(4,7))==EMPTY)
+    assert(boardTest.getCurrentPlayer()==PlayerType.BLACK)
+  }
+
+  test("undoMoveWithBeating"){
+    val testState = Array(
+      Array(EMPTY, WHITE, EMPTY, WHITE, EMPTY, WHITE, EMPTY, EMPTY),
+      Array(WHITE, EMPTY, WHITE, EMPTY, WHITE, EMPTY, WHITE, EMPTY),
+      Array(EMPTY, WHITE, EMPTY, WHITE, EMPTY, WHITE, EMPTY, WHITE),
+      Array(EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY),
+      Array(EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WHITE, EMPTY, EMPTY),
+      Array(BLACK, EMPTY, BLACK, EMPTY, BLACK, EMPTY, BLACK, EMPTY),
+      Array(EMPTY, BLACK, EMPTY, BLACK, EMPTY, BLACK, EMPTY, BLACK),
+      Array(BLACK, EMPTY, BLACK, EMPTY, BLACK, EMPTY, BLACK, EMPTY));
+
+    var boardTest = Board(PlayerType.BLACK,testState);
+    boardTest.makeMove(Move(Position(5,6),Position(3,4)))
+    assert(boardTest.getPawn(Position(5,6))==EMPTY)
+    assert(boardTest.getPawn(Position(3,4))==BLACK)
+    assert(boardTest.getPawn(Position(4,5))==EMPTY)
+    boardTest.undoMove()
+    assert(boardTest.getPawn(Position(5,6))==BLACK)
+    assert(boardTest.getPawn(Position(3,4))==EMPTY)
+    assert(boardTest.getPawn(Position(4,5))==WHITE)
+    assert(boardTest.getCurrentPlayer()==PlayerType.BLACK)
+  }
+
+  test("undoMoveWithMultipleBeating"){
+    val testState = Array(
+      Array(EMPTY, WHITE, EMPTY, WHITE, EMPTY, WHITE, EMPTY, EMPTY),
+      Array(WHITE, EMPTY, WHITE, EMPTY, WHITE, EMPTY, EMPTY, EMPTY),
+      Array(EMPTY, WHITE, EMPTY, WHITE, EMPTY, WHITE, EMPTY, WHITE),
+      Array(EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY),
+      Array(EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WHITE, EMPTY, EMPTY),
+      Array(BLACK, EMPTY, BLACK, EMPTY, BLACK, EMPTY, BLACK, EMPTY),
+      Array(EMPTY, BLACK, EMPTY, BLACK, EMPTY, BLACK, EMPTY, BLACK),
+      Array(BLACK, EMPTY, BLACK, EMPTY, BLACK, EMPTY, BLACK, EMPTY));
+
+    var boardTest = Board(PlayerType.BLACK,testState);
+    boardTest.makeMove(Move(Position(5,6),Position(3,4)))
+    assert(boardTest.getPawn(Position(5,6))==EMPTY)
+    assert(boardTest.getPawn(Position(3,4))==BLACK)
+    assert(boardTest.getPawn(Position(4,5))==EMPTY)
+    boardTest.makeMove(Move(Position(3,4),Position(1,6)))
+    boardTest.undoMove()
+    assert(boardTest.getPawn(Position(5,6))==EMPTY)
+    assert(boardTest.getPawn(Position(3,4))==BLACK)
+    assert(boardTest.getPawn(Position(4,5))==EMPTY)
+    assert(boardTest.getPawn(Position(1,6))==EMPTY)
+    assert(boardTest.getPawn(Position(2,5))==WHITE)
+    assert(boardTest.getCurrentPlayer()==PlayerType.BLACK)
+  }
+
 }
