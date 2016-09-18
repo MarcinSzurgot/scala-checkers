@@ -10,6 +10,14 @@ import scalafx.collections.ObservableBuffer
 import scalafx.stage.Stage
 
 object Draughts extends JFXApp {
+  val playerChoice = new ComboBox[String] {
+    minWidth = 215
+    value = "One Player"
+    items = ObservableBuffer(
+      "One Player",
+      "Two Players"
+    )
+  }
   stage = new JFXApp.PrimaryStage {
     title.value = "Draughts"
     width = 300
@@ -32,7 +40,7 @@ object Draughts extends JFXApp {
           children = Seq(
             new Button("Start") {
               onAction = handle {
-                val boardStage = new BoardStage(List(getClass.getResource("styles.css").toExternalForm))
+                val boardStage = new BoardStage(List(getClass.getResource("styles.css").toExternalForm), playerChoice.value.value)
                 boardStage.show()
               }
             },
@@ -44,14 +52,7 @@ object Draughts extends JFXApp {
           minHeight = 100
         }
 
-        bottom = new ComboBox[String] {
-          minWidth = 215
-          value = "One Player"
-          items = ObservableBuffer(
-            "One Player",
-            "Two Players"
-          )
-        }
+        bottom = playerChoice
       }
     }
   }

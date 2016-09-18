@@ -13,14 +13,14 @@ import main.scala.model.PawnType.PawnType
 import scalafx.scene.control.{Button, Label}
 
 
-class BoardScene(_boardStage: BoardStage) extends Scene
+class BoardScene(_boardStage: BoardStage, _playerNumber: Int) extends Scene
 {
   final val BOARD_LENGTH = 8
   final val START_POS = 1
 
   var board = Array.ofDim[StackPane](BOARD_LENGTH, BOARD_LENGTH)
   val game = new Game(this)
-  var tempBoard = game.initGame(8,8,3,2)
+  var tempBoard = game.initGame(8,8,3,_playerNumber)
   var playerLabel = new Label(tempBoard.getCurrentPlayer().toString) {
     id = "playerName"
     alignment = Pos.Center

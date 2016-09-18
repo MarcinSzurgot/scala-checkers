@@ -29,6 +29,7 @@ class Game(_boardScene: BoardScene) {
     _board = Board();
     val playerListBuilder = ListBuffer[Player]()
     _playersCount = playersCount
+    println(_playersCount)
     playerListBuilder += new Player(_board, PlayerType.WHITE, this, _boardScene)
     playerListBuilder += new Player(_board, PlayerType.BLACK, this, _boardScene)
     _players = playerListBuilder.toList
