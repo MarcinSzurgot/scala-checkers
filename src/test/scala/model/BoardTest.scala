@@ -224,7 +224,7 @@ class BoardTest extends FunSuite with BeforeAndAfterEach {
       Array(BLACK, EMPTY, BLACK, EMPTY, BLACK, EMPTY, BLACK, EMPTY));
       var boardTest = Board(PlayerType.BLACK,modelForBeating);
       boardTest.makeMove(Move(Position(5,0),Position(3,2)))
-      boardTest.makeMove(Move(Position(3,2),Position(0,1)))
+      boardTest.makeMove(Move(Position(3,2),Position(1,0)))
       assert(boardTest.getCurrentPlayer()==PlayerType.WHITE)
   }
 
