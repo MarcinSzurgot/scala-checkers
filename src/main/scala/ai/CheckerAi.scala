@@ -1,16 +1,21 @@
 package main.scala.ai
 
+import main.scala.logic.Game
 import main.scala.model.PlayerAbstract
 import main.scala.model.PlayerType
 import main.scala.model.Board
 import main.scala.model.Move
+import main.scala.view.BoardScene
 
-class CheckerAi(player: PlayerType.PlayerType, board: Board) extends PlayerAbstract {
+class CheckerAi(player: PlayerType.PlayerType, board: Board,  _game: Game, _boardScene : BoardScene) extends PlayerAbstract {
   import CheckerAi._;
 
   override def makeMove(row: Int, col: Int) {
     val move = testMoves();
-    println(board.makeMove(move) + ", " + move);
+    board.makeMove(move);
+    _boardScene.clearSelected()
+    _boardScene.updatePosition(move, board.getPawn(move.begin.row, move.begin.col))
+    _game.nextTurn()
   }
 
   def computePoints(): Int = {
@@ -61,7 +66,7 @@ object CheckerAi {
 
   type PlayerType = PlayerType.PlayerType;
 
-  def apply(player: PlayerType, board: Board): CheckerAi = {
-    return new CheckerAi(player, board);
+  def apply(player: PlayerType.PlayerType, board: Board,  _game: Game, _boardScene : BoardScene): CheckerAi = {
+    return new CheckerAi(player, board, _game, _boardScene);
   }
 }

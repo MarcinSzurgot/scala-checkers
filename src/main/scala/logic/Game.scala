@@ -1,5 +1,6 @@
 package main.scala.logic
 
+import main.scala.ai.CheckerAi
 import main.scala.model._
 import main.scala.view.BoardScene
 
@@ -15,6 +16,7 @@ class Game(_boardScene: BoardScene) {
   private var _playersCount = 0
 
   def nextTurn(): Unit ={
+    println("asasasasas" + getCurrentPlayerIndex() + " " + _board.currentPlayer.toString)
     checkIfGameEnd()
     _boardScene.setCurrentPlayer(_board.currentPlayer.toString)
     _players(getCurrentPlayerIndex()).makeMove(-1,-1)
@@ -27,11 +29,12 @@ class Game(_boardScene: BoardScene) {
                 playersCount: Int
               ) : Board = {
     _board = Board();
-    val playerListBuilder = ListBuffer[Player]()
+    val playerListBuilder = ListBuffer[PlayerAbstract]()
     _playersCount = playersCount
     println(_playersCount)
     playerListBuilder += new Player(_board, PlayerType.WHITE, this, _boardScene)
-    playerListBuilder += new Player(_board, PlayerType.BLACK, this, _boardScene)
+    if(_playersCount == 1) playerListBuilder += new CheckerAi(PlayerType.BLACK,_board, this, _boardScene)
+    else playerListBuilder += new Player(_board, PlayerType.BLACK, this, _boardScene)
     _players = playerListBuilder.toList
     _board
   }

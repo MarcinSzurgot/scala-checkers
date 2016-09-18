@@ -41,23 +41,23 @@ class AiTest extends FunSuite{
 //    
 //    println(speed);
 //  }
-  
-  test("computePoints"){
-    var board = Board();
-    var cpu = CheckerAi(PlayerType.BLACK, board);
-    
-    assertResult(0)(cpu.computePoints());
-    
-    board.makeMove(Move(Position(2, 1), Position(3, 2)));
-    board.makeMove(Move(Position(5, 0), Position(4, 1)));
-    board.makeMove(Move(Position(3, 2), Position(5, 0)));
-    
-    assertResult(-1)(cpu.computePoints());
-  }
-  
-  test("testMoves"){
-    var board = Board();
-    var cpu = CheckerAi(PlayerType.WHITE, board);
-    cpu.makeMove(0, 0);
-  }
+//
+//  test("computePoints"){
+//    var board = Board();
+//    var cpu = CheckerAi(PlayerType.BLACK, board);
+//
+//    assertResult(0)(cpu.computePoints());
+//
+//    board.makeMove(Move(Position(2, 1), Position(3, 2)));
+//    board.makeMove(Move(Position(5, 0), Position(4, 1)));
+//    board.makeMove(Move(Position(3, 2), Position(5, 0)));
+//
+//    assertResult(-1)(cpu.computePoints());
+//  }
+//
+//  test("testMoves"){
+//    var board = Board();
+//    var cpu = CheckerAi(PlayerType.WHITE, board);
+//    cpu.makeMove(0, 0);
+//  }
 }
